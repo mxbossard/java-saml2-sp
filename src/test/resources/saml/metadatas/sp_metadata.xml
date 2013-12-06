@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2012 RECIA http://www.recia.fr
+    @Author (C) 2012 Maxime Bossard <mxbossard@gmail.com>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"
+	entityID="http://www.recia.fr/cas/Shibboleth.sso">
+	<SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+		<KeyDescriptor use="signing">
+			<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+				<ds:KeyName>key1</ds:KeyName>
+				<ds:X509Data>
+					<ds:X509Certificate>
+MIICKzCCAdWgAwIBAgIJAI6dZSyC+htXMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV
+BAYTAkZSMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX
+aWRnaXRzIFB0eSBMdGQwHhcNMTMwMjA0MTEwMzUyWhcNMTMwMzA2MTEwMzUyWjBF
+MQswCQYDVQQGEwJGUjETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50
+ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALj9
+hjOrCp8amPL+8fTfG6jfZelCiesQqwJ04obD6WD3ZCJO+BFLtnRODy9LUk0u6uHU
+/Ow2lANXXGUst3mmG8kCAwEAAaOBpzCBpDAdBgNVHQ4EFgQUpxSI0Js9st1KgOcm
+lM9WNVFhrVswdQYDVR0jBG4wbIAUpxSI0Js9st1KgOcmlM9WNVFhrVuhSaRHMEUx
+CzAJBgNVBAYTAkZSMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRl
+cm5ldCBXaWRnaXRzIFB0eSBMdGSCCQCOnWUsgvobVzAMBgNVHRMEBTADAQH/MA0G
+CSqGSIb3DQEBBQUAA0EAOfnYN/dML+N4nJpscSIQZQUnOU1/QaHWaln1bS2fkmoa
+FD8+J7IB9NAaPrWvRoXeNei6uiHn3Ohz0xscFUPFzA==
+					</ds:X509Certificate>
+				</ds:X509Data>
+			</ds:KeyInfo>
+		</KeyDescriptor>
+		<KeyDescriptor use="encryption">
+			<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+				<ds:KeyName>key2</ds:KeyName>
+				<ds:X509Data>
+					<ds:X509Certificate>
+MIICKzCCAdWgAwIBAgIJAI6dZSyC+htXMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV
+BAYTAkZSMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX
+aWRnaXRzIFB0eSBMdGQwHhcNMTMwMjA0MTEwMzUyWhcNMTMwMzA2MTEwMzUyWjBF
+MQswCQYDVQQGEwJGUjETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50
+ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALj9
+hjOrCp8amPL+8fTfG6jfZelCiesQqwJ04obD6WD3ZCJO+BFLtnRODy9LUk0u6uHU
+/Ow2lANXXGUst3mmG8kCAwEAAaOBpzCBpDAdBgNVHQ4EFgQUpxSI0Js9st1KgOcm
+lM9WNVFhrVswdQYDVR0jBG4wbIAUpxSI0Js9st1KgOcmlM9WNVFhrVuhSaRHMEUx
+CzAJBgNVBAYTAkZSMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRl
+cm5ldCBXaWRnaXRzIFB0eSBMdGSCCQCOnWUsgvobVzAMBgNVHRMEBTADAQH/MA0G
+CSqGSIb3DQEBBQUAA0EAOfnYN/dML+N4nJpscSIQZQUnOU1/QaHWaln1bS2fkmoa
+FD8+J7IB9NAaPrWvRoXeNei6uiHn3Ohz0xscFUPFzA==
+					</ds:X509Certificate>
+				</ds:X509Data>
+			</ds:KeyInfo>
+		</KeyDescriptor>
+		<SingleLogoutService
+			Location="http://www.recia.fr/cas/Shibboleth.sso/SLO/Redirect"
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" />
+		<SingleLogoutService
+			Location="http://www.recia.fr/cas/Shibboleth.sso/SLO/POST"
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" />
+
+		<AssertionConsumerService
+			Location="http://www.recia.fr/cas/Shibboleth.sso/SAML2/Redirect"
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" index="1" />
+		<AssertionConsumerService
+			Location="http://www.recia.fr/cas/Shibboleth.sso/SAML2/POST"
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" index="2" />
+
+		<AttributeConsumingService index="1">
+			<ServiceName xml:lang="en-us">Test_mail_auth</ServiceName>
+			<ServiceDescription xml:lang="en-us">Test_mail_auth.
+			</ServiceDescription>
+
+			<RequestedAttribute FriendlyName="ctemail" Name="ctemail"
+				NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"
+				isRequired="true"></RequestedAttribute>
+		</AttributeConsumingService>
+
+	</SPSSODescriptor>
+
+	<Organization>
+		<OrganizationName xml:lang="fr">RECIA</OrganizationName>
+		<OrganizationDisplayName xml:lang="fr">RECIA
+		</OrganizationDisplayName>
+		<OrganizationURL xml:lang="fr">
+			http://www.recia.fr
+		</OrganizationURL>
+	</Organization>
+
+	<ContactPerson contactType="technical">
+		<GivenName>Maxime</GivenName>
+		<SurName>BOSSARD</SurName>
+		<EmailAddress>maxime.bossard@recia.fr</EmailAddress>
+	</ContactPerson>
+
+</EntityDescriptor>

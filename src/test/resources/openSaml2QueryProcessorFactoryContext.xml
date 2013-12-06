@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2012 RECIA http://www.recia.fr
+    @Author (C) 2012 Maxime Bossard <mxbossard@gmail.com>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:mockito="http://www.mockito.org/spring/mockito"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.mockito.org/spring/mockito classpath:spring/mockito.xsd">
+    <description>
+    	Configuration for the OpenSaml SAML 2.0 Processos.
+    </description>
+    
+    <import resource="classpath:samlResources.xml"/>
+	
+	<!-- Query Processors -->
+	<bean id="authnRespQueryProcessor" class="org.esco.sso.security.saml.opensaml.query.AuthnResponseQueryProcessor" scope="prototype">
+		<property name="endpointLocation" value="/cas/Shibboleth.sso/SAML2" />
+	</bean>
+	
+	<bean id="sloRespQueryProcessor" class="org.esco.sso.security.saml.opensaml.query.SloResponseQueryProcessor" scope="prototype">
+		<property name="endpointLocation" value="/cas/Shibboleth.sso/SLO" />
+	</bean>
+
+	<bean id="sloReqQueryProcessor" class="org.esco.sso.security.saml.opensaml.query.SloRequestQueryProcessor" scope="prototype">
+		<property name="endpointLocation" value="/cas/Shibboleth.sso/SLO" />
+	</bean>
+
+	<bean id="queryProcessorFactory" class="org.esco.sso.security.saml.opensaml.query.OpenSaml2QueryProcessorFactory">
+		<property name="clockSkewSeconds" value="60" />
+		<property name="samlMessageDecoders" ref="samlMessageDecoders" />
+		<property name="signatureValidator" ref="samlSignatureProfileValidator" />
+		<property name="allowDecodingSecurityException" value="false" />
+		
+		<property name="processorConfiguration">
+			<map>
+				<entry key="Response" value="authnRespQueryProcessor" />
+				<entry key="LogoutResponse" value="sloRespQueryProcessor" />
+				<entry key="LogoutRequest" value="sloReqQueryProcessor" />
+			</map>
+		</property>
+		<property name="bindingConfiguration">
+			<map>
+				<entry key="Redirect" value="SAML_20_HTTP_REDIRECT" />
+				<entry key="POST" value="SAML_20_HTTP_POST" />
+			</map>
+		</property>
+	</bean>
+
+	<!-- Fin Query Processors -->
+	
+	<bean id="samlSignatureProfileValidator" class="org.opensaml.security.SAMLSignatureProfileValidator" />
+	
+		<util:map id="samlMessageDecoders">
+		<entry key="SAML_20_HTTP_POST">
+			<bean class="org.opensaml.saml2.binding.decoding.HTTPPostDecoder" />
+		</entry>
+		<entry key="SAML_20_HTTP_REDIRECT">
+			<bean
+				class="org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder" />
+		</entry>
+	</util:map>
+	
+</beans>

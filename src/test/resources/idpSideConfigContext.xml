@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2012 RECIA http://www.recia.fr
+    @Author (C) 2012 Maxime Bossard <mxbossard@gmail.com>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:mockito="http://www.mockito.org/spring/mockito"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.mockito.org/spring/mockito classpath:spring/mockito.xsd">
+    <description>
+    	Configuration for sign and encrypt as the IdP would do it.
+    </description>
+	
+	<import resource="classpath:samlResources.xml"/>
+	
+	<!-- Service Provider config -->
+	<bean id="spConfig" class="org.esco.sso.security.impl.CasSpConfig">
+		<property name="id" value="IdP" />
+		<property name="entityId" value="http://www.recia.fr/spHackedForSignAsIdp" />
+		<property name="spMetadata" value="classpath:saml/metadatas/sp_metadata_hackedForSignAsIdp.xml" />
+		<property name="description" value="IdP sending response." />
+
+		<property name="decryptionKeyResource" ref="idpKey" />
+		<property name="decryptionKeySpec" value="java.security.spec.PKCS8EncodedKeySpec" />
+		<property name="decryptionKeyType" value="RSA" />
+
+		<property name="signingKeyResource" ref="idpKey" />
+		<property name="signingKeySpec" value="java.security.spec.PKCS8EncodedKeySpec" />
+		<property name="signingKeyType" value="RSA" />
+	</bean>
+	
+	<bean id="spProcessor"
+		class="org.esco.sso.security.saml.opensaml.OpenSaml20SpProcessor">
+		<property name="spConfig" ref="spConfig" />
+
+		<property name="idpConnectors">
+			<list>
+				<ref bean="idpConnector" />
+			</list>
+		</property>
+		
+		<property name="queryProcessorFactory" ref="queryProcessorFactory" />
+		
+		<!-- Mocks -->
+		<property name="cas" ref="cas" />
+		<property name="samlFacade" ref="samlFacade" />
+	</bean>
+
+	<!-- Mocked beans -->
+	<mockito:mock id="cas" class="org.jasig.cas.CentralAuthenticationService" />
+	<mockito:mock id="samlFacade" class="org.esco.cas.ISaml20Facade" />
+	<mockito:mock id="idpConnector" class="org.esco.sso.security.saml.opensaml.OpenSaml20IdpConnector" />
+	<mockito:mock id="queryProcessorFactory" class="org.esco.sso.security.saml.opensaml.query.OpenSaml2QueryProcessorFactory" />
+</beans>

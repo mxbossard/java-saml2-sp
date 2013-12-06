@@ -1,0 +1,82 @@
+<!--
+
+    Copyright (C) 2012 RECIA http://www.recia.fr
+    @Author (C) 2012 Maxime Bossard <mxbossard@gmail.com>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<md:EntityDescriptor ID="idp test"
+	entityID="http://www.recia.fr/idp" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+	xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:query="urn:oasis:names:tc:SAML:metadata:ext:query"
+	xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#">
+	<md:IDPSSODescriptor WantAuthnRequestsSigned="false"
+		protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+		<md:KeyDescriptor use="encryption">
+			<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+				<ds:X509Data>
+					<ds:X509Certificate>MIICKzCCAdWgAwIBAgIJAKsIjpTPzxVxMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNVBAYTAkZSMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwHhcNMTMwMjAxMTQzOTU3WhcNMTMwMzAzMTQzOTU3WjBFMQswCQYDVQQGEwJGUjETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKW0W2JExosZd7EfZJtgCCgj7Qj2H+Zdg2txn8TUUawlgIqJtPwfXANYHwccnFPtg2tHXB8a/qdy38XoUxQkhm0CAwEAAaOBpzCBpDAdBgNVHQ4EFgQUP2b2uP4iOJEsEXT9xAVYUvBAAjIwdQYDVR0jBG4wbIAUP2b2uP4iOJEsEXT9xAVYUvBAAjKhSaRHMEUxCzAJBgNVBAYTAkZSMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGSCCQCrCI6Uz88VcTAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA0EAR5MxWkbn/9BPHP6MfuSdgFacIvrAz7Uj/sa2JL83lYgJkNexbmV0c4o/PHI8D24st8zqrvLupKd/gydaMcLoog==</ds:X509Certificate>
+				</ds:X509Data>
+			</ds:KeyInfo>
+			<md:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#tripledes-cbc"></md:EncryptionMethod>
+		</md:KeyDescriptor>
+		<md:KeyDescriptor use="signing">
+			<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+				<ds:X509Data>
+					<ds:X509Certificate>MIICKzCCAdWgAwIBAgIJAKsIjpTPzxVxMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNVBAYTAkZSMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwHhcNMTMwMjAxMTQzOTU3WhcNMTMwMzAzMTQzOTU3WjBFMQswCQYDVQQGEwJGUjETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKW0W2JExosZd7EfZJtgCCgj7Qj2H+Zdg2txn8TUUawlgIqJtPwfXANYHwccnFPtg2tHXB8a/qdy38XoUxQkhm0CAwEAAaOBpzCBpDAdBgNVHQ4EFgQUP2b2uP4iOJEsEXT9xAVYUvBAAjIwdQYDVR0jBG4wbIAUP2b2uP4iOJEsEXT9xAVYUvBAAjKhSaRHMEUxCzAJBgNVBAYTAkZSMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGSCCQCrCI6Uz88VcTAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA0EAR5MxWkbn/9BPHP6MfuSdgFacIvrAz7Uj/sa2JL83lYgJkNexbmV0c4o/PHI8D24st8zqrvLupKd/gydaMcLoog==</ds:X509Certificate>
+				</ds:X509Data>
+			</ds:KeyInfo>
+		</md:KeyDescriptor>
+		<md:ArtifactResolutionService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="http://www.recia.fr/soap/services/SAMLMessageProcessor/AP"
+			index="0" isDefault="true"></md:ArtifactResolutionService>
+		<md:SingleLogoutService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+			Location="http://www.recia.fr/slo/request/AP" ResponseLocation="http://www.recia.fr/login/ct_logout.jsp"></md:SingleLogoutService>
+		<md:SingleLogoutService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://www.recia.fr/slo/request/AP"
+			ResponseLocation="http://www.recia.fr/login/ct_logout.jsp"></md:SingleLogoutService>
+		<md:SingleLogoutService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
+			Location="http://www.recia.fr/slo/request/AP"
+			ResponseLocation="http://www.recia.fr/login/ct_logout.jsp"></md:SingleLogoutService>
+		<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
+			Location="http://www.recia.fr/soap/services/SAMLMessageProcessor/AP"></md:SingleLogoutService>
+		<md:SingleSignOnService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+			Location="http://www.recia.fr/sso/SSO"></md:SingleSignOnService>
+		<md:SingleSignOnService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://www.recia.fr/sso/SSO"></md:SingleSignOnService>
+		<md:SingleSignOnService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
+			Location="http://www.recia.fr/sso/SSO"></md:SingleSignOnService>
+		<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
+			Location="http://www.recia.fr/soap/services/SAMLMessageProcessor/AP"></md:SingleSignOnService>
+	</md:IDPSSODescriptor>
+	<md:Organization>
+		<md:OrganizationName xml:lang="en-us">
+			IdP test
+		</md:OrganizationName>
+		<md:OrganizationDisplayName xml:lang="en-us">
+			IdP test
+		</md:OrganizationDisplayName>
+		<md:OrganizationURL xml:lang="en-us">
+			http://www.recia.fr
+		</md:OrganizationURL>
+	</md:Organization>
+	<md:ContactPerson contactType="technical">
+		<md:Company>Recia</md:Company>
+		<md:GivenName>Maxime</md:GivenName>
+		<md:SurName>BOSSARD</md:SurName>
+		<md:EmailAddress>maxime.bossard@recia.fr</md:EmailAddress>
+	</md:ContactPerson>
+</md:EntityDescriptor>

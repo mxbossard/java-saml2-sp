@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+    Copyright (C) 2012 RECIA http://www.recia.fr
+    @Author (C) 2012 Maxime Bossard <mxbossard@gmail.com>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+	ID="_76e026126bc35c0f825eced51d6bd43b" IssueInstant="2009-08-13T19:54:55.562Z"
+	Version="2.0">
+	<saml:Issuer>http://saml.r.us/AssertingParty</saml:Issuer>
+	<saml:Subject>
+		<saml:NameID>harold_dt</saml:NameID>
+		<saml:SubjectConfirmation
+			Method="urn:oasis:names:tc:SAML:2.0:cm:sender-vouches" />
+	</saml:Subject>
+	<saml:Conditions NotBefore="2009-08-13T19:54:45.562Z"
+		NotOnOrAfter="2009-08-13T20:24:55.562Z" />
+	<saml:AuthnStatement>
+		<saml:AuthnContext>
+			<saml:AuthnContextClassRef>
+				urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport
+			</saml:AuthnContextClassRef>
+		</saml:AuthnContext>
+	</saml:AuthnStatement>
+</saml:Assertion>

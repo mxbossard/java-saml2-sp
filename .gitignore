@@ -1,6 +1,15 @@
+*.project
+*.classpath
+*/target
+*/.settings
 *.class
+*.springBeans
+*MANIFEST.MF
+*build.properties
+*/build
 
 # Package Files #
 *.jar
 *.war
 *.ear
+/target

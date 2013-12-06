@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2012 RECIA http://www.recia.fr
+    @Author (C) 2012 Maxime Bossard <mxbossard@gmail.com>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="spKey" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/keys/sp_key.der" />
+	</bean>
+	
+	<bean id="idpKey" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/keys/idp_key.der" />
+	</bean>
+	
+	<bean id="spMetadata" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/metadatas/sp_metadata.xml" />
+	</bean>	
+
+	<bean id="idpMetadata" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/metadatas/idp_metadata.xml" />
+	</bean>	
+	
+	<bean id="authnRequest" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/authnRequest.xml" />
+	</bean>
+	
+	<!-- Signature only on Response -->
+	<bean id="responseSimpleSigned" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/response_signed_simple.xml" />
+	</bean>
+	
+	<!-- Signature only on Assertion -->
+	<bean id="responseAssertSigned" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/response_signed_assert.xml" />
+	</bean>
+	
+	<!-- Signature only on Response & Assertion -->
+	<bean id="responseFullSigned" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/response_signed_full.xml" />
+	</bean>
+	
+	<bean id="sloResponse" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/slo_response.xml" />
+	</bean>
+	
+	<bean id="responseAttacked1" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/response_attacked1.xml" />
+	</bean>
+	
+	<bean id="responseAttacked2" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/response_attacked2.xml" />
+	</bean>
+		
+	<bean id="responseAttacked3" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/response_attacked3.xml" />
+	</bean>
+			
+	<bean id="responseAttacked4" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/response_attacked4.xml" />
+	</bean>
+	
+	<bean id="saml20Assertion" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/assertion.xml" />
+	</bean>
+	
+</beans>

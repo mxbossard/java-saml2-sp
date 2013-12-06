@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+    Copyright (C) 2012 RECIA http://www.recia.fr
+    @Author (C) 2012 Maxime Bossard <mxbossard@gmail.com>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+	ID="_db6a228bfd85e374bc998817a031c3c6f595bf7b0257443a09039b89eda38971451ee7c4fa5ed213ec1b" Version="2.0"
+	IssueInstant="2013-02-04T09:42:37.000Z" ForceAuthn="false" IsPassive="false"
+	ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+	AssertionConsumerServiceURL="http://www.recia.fr/idp/saml2/POST/SSO">
+	<saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+		http://www.recia.fr/cas/Shibboleth.sso
+	</saml:Issuer>
+	<samlp:NameIDPolicy xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+		Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"
+		SPNameQualifier="http://www.recia.fr/cas/Shibboleth.sso" AllowCreate="true" />
+	<samlp:RequestedAuthnContext xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+		Comparison="exact">
+		<saml:AuthnContextClassRef xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+			urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport
+		</saml:AuthnContextClassRef>
+	</samlp:RequestedAuthnContext>
+</samlp:AuthnRequest>
+
