@@ -63,13 +63,16 @@ import fr.mby.saml2.sp.api.core.ISaml20Storage;
 import fr.mby.saml2.sp.api.exception.SamlProcessingException;
 import fr.mby.saml2.sp.api.exception.SamlSecurityException;
 import fr.mby.saml2.sp.api.exception.UnsupportedSamlOperation;
+import fr.mby.saml2.sp.api.handler.IAuthenticationHandler;
 import fr.mby.saml2.sp.api.handler.ISingleLogoutHandler;
 import fr.mby.saml2.sp.api.om.IAuthentication;
 import fr.mby.saml2.sp.api.om.IIncomingSaml;
 import fr.mby.saml2.sp.api.om.IRequestWaitingForResponse;
+import fr.mby.saml2.sp.api.query.IQuery;
 import fr.mby.saml2.sp.api.query.engine.IQueryProcessor;
 import fr.mby.saml2.sp.api.query.engine.IQueryProcessorFactory;
 import fr.mby.saml2.sp.impl.helper.SamlHelper;
+import fr.mby.saml2.sp.impl.query.QueryAuthnResponse;
 
 /**
  * Basic OpenSaml impl.
@@ -116,6 +119,9 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 	/** SAML 2.0 Facade. */
 	private ISaml20Storage samlStorage;
 
+	/** Authentication handler. */
+	private IAuthenticationHandler authenticationHandler;
+
 	/** SLO handler. */
 	private ISingleLogoutHandler singleLogoutHandler;
 
@@ -132,6 +138,8 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 
 		// Process the message
 		incomingSaml = queryProcessor.processIncomingSamlMessage();
+
+		this.tryAuthenticationPropagation(incomingSaml);
 
 		return incomingSaml;
 	}
@@ -185,16 +193,10 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 	}
 
 	@Override
-	public boolean logout(final String sessionIndex) {
-		final boolean logouted;
-
+	public void logout(final String sessionIndex) {
 		if (this.singleLogoutHandler != null) {
-			logouted = this.singleLogoutHandler.logout(sessionIndex);
-		} else {
-			logouted = false;
+			this.singleLogoutHandler.logout(sessionIndex);
 		}
-
-		return logouted;
 	}
 
 	@Override
@@ -233,6 +235,10 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 
 		// Register this processor in the Helper
 		SamlHelper.registerSpProcessor(this);
+
+		if (this.authenticationHandler == null) {
+			this.logger.warn("No Authentication Handler configured !");
+		}
 
 		if (this.singleLogoutHandler == null) {
 			this.logger.warn("No Single Logout Handler configured !");
@@ -442,6 +448,28 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 		return signature;
 	}
 
+	/**
+	 * Try to propagate authentications to Authentication Handler.
+	 * 
+	 * @param incomingSaml
+	 *            an incoming saml message
+	 */
+	protected void tryAuthenticationPropagation(final IIncomingSaml incomingSaml) {
+		if (incomingSaml != null) {
+			final IQuery samlQuery = incomingSaml.getSamlQuery();
+
+			// Propagate authentication to authentication handlers
+			if (samlQuery != null && QueryAuthnResponse.class.isAssignableFrom(samlQuery.getClass())) {
+				final QueryAuthnResponse queryAuthnResponse = (QueryAuthnResponse) samlQuery;
+				if (this.authenticationHandler != null) {
+					final List<IAuthentication> authns = queryAuthnResponse.getSamlAuthentications();
+					this.authenticationHandler.propagateAuthentications(authns);
+				}
+			}
+
+		}
+	}
+
 	public Ehcache getSamlRequestDataCache() {
 		return this.samlRequestWaitingForResponseCache;
 	}
@@ -486,6 +514,25 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 	}
 
 	/**
+	 * Getter of authenticationHandler.
+	 * 
+	 * @return the authenticationHandler
+	 */
+	public IAuthenticationHandler getAuthenticationHandler() {
+		return this.authenticationHandler;
+	}
+
+	/**
+	 * Setter of authenticationHandler.
+	 * 
+	 * @param authenticationHandler
+	 *            the authenticationHandler to set
+	 */
+	public void setAuthenticationHandler(final IAuthenticationHandler authenticationHandler) {
+		this.authenticationHandler = authenticationHandler;
+	}
+
+	/**
 	 * Getter of singleLogoutHandler.
 	 * 
 	 * @return the singleLogoutHandler
@@ -504,10 +551,21 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 		this.singleLogoutHandler = singleLogoutHandler;
 	}
 
+	/**
+	 * Getter of queryProcessorFactory.
+	 * 
+	 * @return the queryProcessorFactory
+	 */
 	public IQueryProcessorFactory getQueryProcessorFactory() {
 		return this.queryProcessorFactory;
 	}
 
+	/**
+	 * Setter of queryProcessorFactory.
+	 * 
+	 * @param queryProcessorFactory
+	 *            the queryProcessorFactory to set
+	 */
 	public void setQueryProcessorFactory(final IQueryProcessorFactory queryProcessorFactory) {
 		this.queryProcessorFactory = queryProcessorFactory;
 	}

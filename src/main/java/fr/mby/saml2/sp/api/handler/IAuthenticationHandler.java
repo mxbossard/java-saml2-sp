@@ -16,6 +16,8 @@
 
 package fr.mby.saml2.sp.api.handler;
 
+import java.util.List;
+
 import fr.mby.saml2.sp.api.om.IAuthentication;
 
 /**
@@ -24,6 +26,6 @@ import fr.mby.saml2.sp.api.om.IAuthentication;
  */
 public interface IAuthenticationHandler {
 
-	void propagateAuthentication(IAuthentication authentication);
+	void propagateAuthentications(List<IAuthentication> authentications);
 
 }

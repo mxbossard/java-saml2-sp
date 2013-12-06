@@ -112,7 +112,6 @@ public interface ISaml20SpProcessor {
 	 * 
 	 * @param sessionIndex
 	 *            the IdP session index
-	 * @return true if the session was logout
 	 */
-	boolean logout(String sessionIndex);
+	void logout(String sessionIndex);
 }

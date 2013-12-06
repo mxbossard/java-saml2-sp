@@ -16,7 +16,6 @@
 
 package fr.mby.saml2.sp.api.handler;
 
-
 /**
  * @author Maxime Bossard - 2013
  * 
@@ -27,8 +26,7 @@ public interface ISingleLogoutHandler {
 	 * Perform a Single Logout.
 	 * 
 	 * @param sessionIndex
-	 * @return true if the logout must be considered successful
 	 */
-	boolean logout(String sessionIndex);
+	void logout(String sessionIndex);
 
 }

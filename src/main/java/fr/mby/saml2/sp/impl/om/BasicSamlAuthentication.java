@@ -60,7 +60,7 @@ public class BasicSamlAuthentication implements IInternalAuthentication {
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder(256);
-		sb.append("BasicSamlAuthentication [authenticationInstant=");
+		sb.append("BasicSamlAuthentication [authInstant=");
 		sb.append(this.authenticationInstant);
 		sb.append(", idpEntityId=");
 		sb.append(this.idpEntityId);

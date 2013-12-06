@@ -27,9 +27,8 @@ import fr.mby.saml2.sp.api.handler.ISingleLogoutHandler;
 public class NullSingleLogoutHandler implements ISingleLogoutHandler {
 
 	@Override
-	public boolean logout(final String sessionIndex) {
-
-		return false;
+	public void logout(final String sessionIndex) {
+		// Do nothing
 	}
 
 }
