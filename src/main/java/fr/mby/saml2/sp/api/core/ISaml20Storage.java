@@ -19,7 +19,7 @@
 
 package fr.mby.saml2.sp.api.core;
 
-import org.esco.cas.authentication.principal.ISaml20Credentials;
+import fr.mby.saml2.sp.api.om.IAuthentication;
 
 /**
  * @author GIP RECIA 2012 - Maxime BOSSARD.
@@ -32,28 +32,28 @@ public interface ISaml20Storage {
 	 * 
 	 * @param sessionIndex
 	 *            the user's session index
-	 * @param credentials
-	 *            the user Credentials
+	 * @param authentication
+	 *            the user authentication
 	 */
-	void storeAuthCredentialsInCache(String sessionIndex, ISaml20Credentials credentials);
+	void storeAuthenticationInCache(String sessionIndex, IAuthentication authentication);
 
 	/**
 	 * Retrieve SAML 2.0 credentials of a session index.
 	 * 
 	 * @param sessionIndex
 	 *            the user's session index
-	 * @return the user Credentials
+	 * @return the user authentication
 	 */
-	ISaml20Credentials retrieveAuthCredentialsFromCache(String sessionIndex);
+	IAuthentication retrieveAuthenticationFromCache(String sessionIndex);
 
 	/**
 	 * Remove SAML 2.0 Credentials of a session index.
 	 * 
 	 * @param sessionIndex
 	 *            the user's session index
-	 * @return the user Credentials
+	 * @return the user authentication
 	 */
-	ISaml20Credentials removeAuthenticationInfosFromCache(String sessionIndex);
+	IAuthentication removeAuthenticationFromCache(String sessionIndex);
 
 	/**
 	 * Find the CAS TGT Id corresponding to the SAML 2.0 Name ID.

@@ -21,8 +21,6 @@ package fr.mby.saml2.sp.opensaml.core;
 
 import java.util.Map;
 
-import org.esco.cas.authentication.principal.ISaml20Credentials;
-import org.esco.cas.impl.SamlAuthInfo;
 import org.joda.time.DateTime;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
@@ -68,6 +66,7 @@ import fr.mby.saml2.sp.api.core.ISaml20Storage;
 import fr.mby.saml2.sp.api.core.SamlBindingEnum;
 import fr.mby.saml2.sp.api.exception.SamlBuildingException;
 import fr.mby.saml2.sp.api.handler.ISamlDataAdaptor;
+import fr.mby.saml2.sp.api.om.IAuthentication;
 import fr.mby.saml2.sp.api.om.IOutgoingSaml;
 import fr.mby.saml2.sp.api.om.IRequestWaitingForResponse;
 import fr.mby.saml2.sp.api.query.IQuery;
@@ -153,12 +152,10 @@ public class OpenSaml20IdpConnector implements ISaml20IdpConnector, Initializing
 		final ISaml20SpProcessor spProc = this.getSaml20SpProcessor();
 		final ISaml20Storage samlStorage = spProc.getSaml20Storage();
 
-		final ISaml20Credentials credentials = samlStorage.retrieveAuthCredentialsFromCache(sessionIndex);
-		Assert.notNull(credentials, "SAML credentials cannot be null here !");
-		final SamlAuthInfo authInfos = credentials.getAuthenticationInformations();
-		Assert.notNull(authInfos, "SAML auth informations cannot be null here !");
+		final IAuthentication auth = samlStorage.retrieveAuthenticationFromCache(sessionIndex);
+		Assert.notNull(auth, "SAML authentication cannot be null here !");
 
-		final LogoutRequest logoutRequest = this.buildLogoutRequest(binding, authInfos);
+		final LogoutRequest logoutRequest = this.buildLogoutRequest(binding, auth);
 
 		final IOutgoingSaml outgoingSaml;
 		try {
@@ -406,7 +403,7 @@ public class OpenSaml20IdpConnector implements ISaml20IdpConnector, Initializing
 	 * @return the authentication request
 	 * @throws SamlBuildingException
 	 */
-	protected LogoutRequest buildLogoutRequest(final SamlBindingEnum binding, final SamlAuthInfo authInfos)
+	protected LogoutRequest buildLogoutRequest(final SamlBindingEnum binding, final IAuthentication auth)
 			throws SamlBuildingException {
 		final DateTime issueInstant = new DateTime();
 		final LogoutRequest logoutRequest = this.logoutRequestBuilder.buildObject(LogoutRequest.DEFAULT_ELEMENT_NAME);
@@ -417,7 +414,7 @@ public class OpenSaml20IdpConnector implements ISaml20IdpConnector, Initializing
 		logoutRequest.setVersion(SAMLVersion.VERSION_20);
 		logoutRequest.setNotOnOrAfter(this.buildNotOnOrAfterTime(issueInstant));
 
-		final String subjectId = authInfos.getIdpSubject();
+		final String subjectId = auth.getSubjectId();
 		if (!StringUtils.hasText(subjectId)) {
 			// We don't know the subject so we cannot build a logout request
 			throw new SamlBuildingException("No SAML 2.0 Subject can be found to build the Single Logout Request !");
@@ -428,7 +425,7 @@ public class OpenSaml20IdpConnector implements ISaml20IdpConnector, Initializing
 		newNameId.setValue(subjectId);
 		logoutRequest.setNameID(newNameId);
 
-		final String sessionIndex = authInfos.getSessionIndex();
+		final String sessionIndex = auth.getSessionIndex();
 		if (StringUtils.hasText(sessionIndex)) {
 			final SessionIndex sessionIndexObj = this.sessionIndexBuilder
 					.buildObject(SessionIndex.DEFAULT_ELEMENT_NAME);

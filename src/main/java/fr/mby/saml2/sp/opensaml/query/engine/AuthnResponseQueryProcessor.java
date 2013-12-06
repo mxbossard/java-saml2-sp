@@ -55,6 +55,7 @@ import fr.mby.saml2.sp.api.exception.SamlSecurityException;
 import fr.mby.saml2.sp.api.exception.SamlValidationException;
 import fr.mby.saml2.sp.api.exception.UnsupportedSamlOperation;
 import fr.mby.saml2.sp.api.om.IAuthentication;
+import fr.mby.saml2.sp.api.om.IInternalAuthentication;
 import fr.mby.saml2.sp.impl.helper.SamlValidationHelper;
 import fr.mby.saml2.sp.impl.om.BasicSamlAuthentication;
 import fr.mby.saml2.sp.impl.query.QueryAuthnRequest;
@@ -422,7 +423,7 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 	 * @throws DecryptionException
 	 * @throws SamlSecurityException
 	 */
-	protected void processAuthnAttributes(final Assertion assertion, final IAuthentication authn)
+	protected void processAuthnAttributes(final Assertion assertion, final IInternalAuthentication authn)
 			throws SamlSecurityException, DecryptionException {
 		final List<Attribute> attributes = this.retrieveAttributes(assertion);
 		if (!CollectionUtils.isEmpty(attributes)) {

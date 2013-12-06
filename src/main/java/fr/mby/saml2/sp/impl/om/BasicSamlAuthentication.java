@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package fr.mby.saml2.sp.impl.om;
 
 import java.util.HashMap;
@@ -25,16 +26,15 @@ import java.util.Map;
 import org.joda.time.DateTime;
 
 import fr.mby.saml2.sp.api.exception.SamlSecurityException;
-import fr.mby.saml2.sp.api.om.IAuthentication;
+import fr.mby.saml2.sp.api.om.IInternalAuthentication;
 
 /**
- * Basic implementation of a ISamlAuthentication.
- * This object is immutable after a call on locked() method.
+ * Basic implementation of a ISamlAuthentication. This object is immutable after a call on locked() method.
  * 
  * @author GIP RECIA 2012 - Maxime BOSSARD.
- *
+ * 
  */
-public class BasicSamlAuthentication implements IAuthentication {
+public class BasicSamlAuthentication implements IInternalAuthentication {
 
 	/** Svuid. */
 	private static final long serialVersionUID = 4483119001430907777L;
@@ -45,6 +45,9 @@ public class BasicSamlAuthentication implements IAuthentication {
 	/** IdP Authentication instant. */
 	private DateTime authenticationInstant;
 
+	/** IdP Entity Id. */
+	private String idpEntityId;
+
 	/** IdP subject ID. */
 	private String subjectId;
 
@@ -52,13 +55,15 @@ public class BasicSamlAuthentication implements IAuthentication {
 	private String sessionIndex;
 
 	/** Subject attributes. */
-	private Map<String, List<String>> attributes = new HashMap<String, List<String>>(2);
+	private final Map<String, List<String>> attributes = new HashMap<String, List<String>>(2);
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(256);
+		final StringBuilder sb = new StringBuilder(256);
 		sb.append("BasicSamlAuthentication [authenticationInstant=");
 		sb.append(this.authenticationInstant);
+		sb.append(", idpEntityId=");
+		sb.append(this.idpEntityId);
 		sb.append(", subjectId=");
 		sb.append(this.subjectId);
 		sb.append(", sessionIndex=");
@@ -67,12 +72,17 @@ public class BasicSamlAuthentication implements IAuthentication {
 		sb.append(this.attributes.toString());
 		sb.append("]");
 
-		return  sb.toString();
+		return sb.toString();
 	}
 
 	@Override
 	public DateTime getAuthenticationInstant() {
 		return this.authenticationInstant;
+	}
+
+	@Override
+	public String getIdpEntityId() {
+		return this.idpEntityId;
 	}
 
 	@Override
@@ -86,11 +96,9 @@ public class BasicSamlAuthentication implements IAuthentication {
 	}
 
 	@Override
-	public void addAttribute(final String name, final List<String> values)
-			throws SamlSecurityException {
+	public void addAttribute(final String name, final List<String> values) throws SamlSecurityException {
 		if (this.locked) {
-			throw new IllegalAccessError(
-					"The BasicSamlAuthentication is locked ! It cannot be modified !");
+			throw new IllegalAccessError("The BasicSamlAuthentication is locked ! It cannot be modified !");
 		}
 
 		final List<String> alreadyKnown = this.attributes.get(name);
@@ -119,8 +127,7 @@ public class BasicSamlAuthentication implements IAuthentication {
 
 	public void setAuthenticationInstant(final DateTime authenticationInstant) {
 		if (this.locked) {
-			throw new IllegalAccessError(
-					"The BasicSamlAuthentication is locked ! It cannot be modified !");
+			throw new IllegalAccessError("The BasicSamlAuthentication is locked ! It cannot be modified !");
 		}
 
 		this.authenticationInstant = authenticationInstant;
@@ -128,8 +135,7 @@ public class BasicSamlAuthentication implements IAuthentication {
 
 	public void setSubjectId(final String subjectId) {
 		if (this.locked) {
-			throw new IllegalAccessError(
-					"The BasicSamlAuthentication is locked ! It cannot be modified !");
+			throw new IllegalAccessError("The BasicSamlAuthentication is locked ! It cannot be modified !");
 		}
 
 		this.subjectId = subjectId;
@@ -137,11 +143,20 @@ public class BasicSamlAuthentication implements IAuthentication {
 
 	public void setSessionIndex(final String sessionIndex) {
 		if (this.locked) {
-			throw new IllegalAccessError(
-					"The BasicSamlAuthentication is locked ! It cannot be modified !");
+			throw new IllegalAccessError("The BasicSamlAuthentication is locked ! It cannot be modified !");
 		}
 
 		this.sessionIndex = sessionIndex;
+	}
+
+	/**
+	 * Setter of idpEntityId.
+	 * 
+	 * @param idpEntityId
+	 *            the idpEntityId to set
+	 */
+	public void setIdpEntityId(final String idpEntityId) {
+		this.idpEntityId = idpEntityId;
 	}
 
 }

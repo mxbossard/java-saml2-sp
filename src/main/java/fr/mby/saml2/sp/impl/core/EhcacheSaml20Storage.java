@@ -25,13 +25,13 @@ import net.sf.ehcache.CacheException;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 
-import org.esco.cas.authentication.principal.ISaml20Credentials;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.ehcache.EhCacheFactoryBean;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import fr.mby.saml2.sp.api.core.ISaml20Storage;
+import fr.mby.saml2.sp.api.om.IAuthentication;
 
 /**
  * Facade for CAS SAML 2.0 usage
@@ -61,8 +61,8 @@ public class EhcacheSaml20Storage implements ISaml20Storage, InitializingBean {
 	private Ehcache saml2BaseIdCache;
 
 	@Override
-	public void storeAuthCredentialsInCache(final String tgtId, final ISaml20Credentials credentials) {
-		if (StringUtils.hasText(tgtId) && (credentials != null)) {
+	public void storeAuthenticationInCache(final String tgtId, final IAuthentication auth) {
+		if (StringUtils.hasText(tgtId) && (auth != null)) {
 			if (this.saml2AuthenticatedCredentialsCache.isKeyInCache(tgtId)) {
 				// TGT already used !
 				throw new IllegalStateException(
@@ -70,9 +70,9 @@ public class EhcacheSaml20Storage implements ISaml20Storage, InitializingBean {
 								"Unable to store SAML 2.0 authenticated credentials in cache beacause TGT [%s] is already present !",
 								tgtId));
 			}
-			this.saml2AuthenticatedCredentialsCache.put(new Element(tgtId, credentials));
+			this.saml2AuthenticatedCredentialsCache.put(new Element(tgtId, auth));
 
-			final String idpSubject = credentials.getAuthenticationInformations().getIdpSubject();
+			final String idpSubject = auth.getSubjectId();
 			if (StringUtils.hasText(idpSubject)) {
 				this.saml2NameIdCache.put(new Element(idpSubject, tgtId));
 			}
@@ -80,38 +80,38 @@ public class EhcacheSaml20Storage implements ISaml20Storage, InitializingBean {
 	}
 
 	@Override
-	public ISaml20Credentials retrieveAuthCredentialsFromCache(final String tgtId) {
-		ISaml20Credentials authInfos = null;
+	public IAuthentication retrieveAuthenticationFromCache(final String tgtId) {
+		IAuthentication auth = null;
 
 		if (StringUtils.hasText(tgtId)) {
 			final Element element = this.saml2AuthenticatedCredentialsCache.get(tgtId);
 			if (element != null) {
 				final Object value = element.getValue();
 				if (value != null) {
-					authInfos = (ISaml20Credentials) value;
+					auth = (IAuthentication) value;
 				}
 			}
 		}
 
-		return authInfos;
+		return auth;
 	}
 
 	@Override
-	public ISaml20Credentials removeAuthenticationInfosFromCache(final String tgtId) {
-		final ISaml20Credentials credentials = this.retrieveAuthCredentialsFromCache(tgtId);
+	public IAuthentication removeAuthenticationFromCache(final String tgtId) {
+		final IAuthentication auth = this.retrieveAuthenticationFromCache(tgtId);
 
 		if (StringUtils.hasText(tgtId)) {
 			this.saml2AuthenticatedCredentialsCache.remove(tgtId);
 		}
 
-		if (credentials != null) {
-			final String idpSubject = credentials.getAuthenticationInformations().getIdpSubject();
+		if (auth != null) {
+			final String idpSubject = auth.getSubjectId();
 			if (StringUtils.hasText(idpSubject)) {
 				this.saml2NameIdCache.remove(idpSubject);
 			}
 		}
 
-		return credentials;
+		return auth;
 	}
 
 	/**

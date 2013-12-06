@@ -21,9 +21,9 @@
 	xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:util="http://www.springframework.org/schema/util"
 	xmlns:mockito="http://www.mockito.org/spring/mockito"
-	xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
     <description>
     	Configuration for sign and encrypt as the IdP would do it.
     </description>
@@ -64,12 +64,12 @@
 		
 		<!-- Mocks -->
 		<property name="samlStorage" ref="samlStorage" />
-		
-		<!-- Mocked beans -->
-		<mockito:mock id="samlStorage" class="fr.mby.saml2.sp.api.core.ISaml20Storage" />
-		<mockito:mock id="idpConnector" class="fr.mby.saml2.sp.opensaml.core.OpenSaml20IdpConnector" />
-		<mockito:mock id="queryProcessorFactory" class="fr.mby.saml2.sp.opensaml.query.engine.OpenSaml2QueryProcessorFactory" />
 
 	</bean>
-	
+		
+	<!-- Mocked beans -->
+	<mockito:mock id="samlStorage" class="fr.mby.saml2.sp.api.core.ISaml20Storage" />
+	<mockito:mock id="idpConnector" class="fr.mby.saml2.sp.opensaml.core.OpenSaml20IdpConnector" />
+	<mockito:mock id="queryProcessorFactory" class="fr.mby.saml2.sp.opensaml.query.engine.OpenSaml2QueryProcessorFactory" />
+
 </beans>

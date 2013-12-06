@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package fr.mby.saml2.sp.api.om;
 
 import java.io.Serializable;
@@ -24,13 +25,11 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 
-import fr.mby.saml2.sp.api.exception.SamlSecurityException;
-
 /**
  * Base interface representing an authentication from an IdP.
  * 
  * @author GIP RECIA 2012 - Maxime BOSSARD.
- *
+ * 
  */
 public interface IAuthentication extends Serializable {
 
@@ -40,6 +39,13 @@ public interface IAuthentication extends Serializable {
 	 * @return The authentication instant.
 	 */
 	DateTime getAuthenticationInstant();
+
+	/**
+	 * Get the Entity Id of the IdP choosed by the user to perform the authentication.
+	 * 
+	 * @return the IdP Entity Id.
+	 */
+	String getIdpEntityId();
 
 	/**
 	 * Get the authenticated subject ID.
@@ -56,18 +62,10 @@ public interface IAuthentication extends Serializable {
 	String getSessionIndex();
 
 	/**
-	 * Add an authentication attribute.
-	 * 
-	 * @param name the name of the attribute
-	 * @param values the values of the attribute
-	 * @throws SamlSecurityException if multiple attribute with same name
-	 */
-	void addAttribute(String name, List<String> values) throws SamlSecurityException;
-
-	/**
 	 * Get on attribute values.
 	 * 
-	 * @param name the name of the attribute
+	 * @param name
+	 *            the name of the attribute
 	 * @return the values of the attribute
 	 */
 	List<String> getAttribute(String name);
