@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package fr.mby.saml2.sp.opensaml.query.engine;
 
 import java.util.Map;
@@ -58,15 +59,14 @@ import fr.mby.saml2.sp.api.query.engine.IQueryProcessorFactory;
 import fr.mby.saml2.sp.impl.helper.SamlHelper;
 
 /**
- * OpenSaml 2 implementation of QueryProcessorFactory.
- * This factory build the OpenSaml tree object representing the SAML message.
- * The XML element name of the SAML message is used to determine which query processor to build.
- * The factory is based on Spring Bean Factory
+ * OpenSaml 2 implementation of QueryProcessorFactory. This factory build the OpenSaml tree object representing the SAML
+ * message. The XML element name of the SAML message is used to determine which query processor to build. The factory is
+ * based on Spring Bean Factory
  * 
  * @see BeanFactoryAware.
  * 
  * @author GIP RECIA 2013 - Maxime BOSSARD.
- *
+ * 
  */
 public class OpenSaml2QueryProcessorFactory implements IQueryProcessorFactory, InitializingBean, BeanFactoryAware {
 
@@ -102,9 +102,8 @@ public class OpenSaml2QueryProcessorFactory implements IQueryProcessorFactory, I
 	private BeanFactory beanFactory;
 
 	@Override
-	public IQueryProcessor buildQueryProcessor(final ISaml20SpProcessor spProcessor,
-			final HttpServletRequest request)
-					throws UnsupportedSamlOperation, SamlProcessingException {
+	public IQueryProcessor buildQueryProcessor(final ISaml20SpProcessor spProcessor, final HttpServletRequest request)
+			throws UnsupportedSamlOperation, SamlProcessingException {
 		Assert.notNull(request, "HTTP request is null !");
 
 		BaseOpenSaml2QueryProcessor<?, ?> newInstance = null;
@@ -114,24 +113,23 @@ public class OpenSaml2QueryProcessorFactory implements IQueryProcessorFactory, I
 		SAMLObject openSamlObject = null;
 		try {
 			openSamlObject = this.extractOpenSamlObjectFromRequest(request, bindingUsed);
-		} catch (SamlSecurityException e) {
+		} catch (final SamlSecurityException e) {
 			SamlHelper.logSecurityProblem(e, null);
 		}
 
 		final String localElementName = openSamlObject.getElementQName().getLocalPart();
 
-		String queryProcessorId = this.processorConfiguration.get(localElementName);
+		final String queryProcessorId = this.processorConfiguration.get(localElementName);
 
 		if (queryProcessorId == null) {
-			String message = String.format(
-					"OpenSaml element [%1$s] is not associated to a QueryProcessor in config !",
-					localElementName);
+			final String message = String.format(
+					"OpenSaml element [%1$s] is not associated to a QueryProcessor in config !", localElementName);
 			throw new UnsupportedSamlOperation(message);
 		}
 
 		try {
 			newInstance = (BaseOpenSaml2QueryProcessor<?, ?>) this.beanFactory.getBean(queryProcessorId);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new SamlProcessingException("Unable to build new instance of OpenSaml Query Processor !", e);
 		}
 
@@ -155,21 +153,21 @@ public class OpenSaml2QueryProcessorFactory implements IQueryProcessorFactory, I
 		Assert.notNull(this.samlMessageDecoders, "No SAML message decoders configured !");
 		Assert.notNull(this.signatureValidator, "No signature validator configured !");
 
-		//TODO MBD: what to do with this ?
-		StorageService<String, ReplayCacheEntry> storageEngine = new MapBasedStorageService<String, ReplayCacheEntry>();
-		ReplayCache replayCache = new ReplayCache(storageEngine, 60 * 1000 * this.replayMinutes);
+		// TODO MBD: what to do with this ?
+		final StorageService<String, ReplayCacheEntry> storageEngine = new MapBasedStorageService<String, ReplayCacheEntry>();
+		final ReplayCache replayCache = new ReplayCache(storageEngine, 60 * 1000 * this.replayMinutes);
 		this.rule = new MessageReplayRule(replayCache);
 
 		Assert.notNull(this.samlMessageDecoders, "No SAML message decoders provided for this IdP connector !");
-		for (SamlBindingEnum binding : SamlBindingEnum.values()) {
+		for (final SamlBindingEnum binding : SamlBindingEnum.values()) {
 			Assert.notNull(this.samlMessageDecoders.get(binding),
-					String.format("No SAML message decoder provided for the binding [%s] !",
-							binding.getDescription()));
+					String.format("No SAML message decoder provided for the binding [%s] !", binding.getDescription()));
 		}
 
 	}
 
-	protected SamlBindingEnum extractBindingFromRequest(final HttpServletRequest request) throws UnsupportedSamlOperation {
+	protected SamlBindingEnum extractBindingFromRequest(final HttpServletRequest request)
+			throws UnsupportedSamlOperation {
 		SamlBindingEnum binding = null;
 
 		final String endpointUri = request.getRequestURI();
@@ -178,9 +176,8 @@ public class OpenSaml2QueryProcessorFactory implements IQueryProcessorFactory, I
 		binding = this.bindingConfiguration.get(bindingPart);
 
 		if (binding == null) {
-			final String message = String.format( "The endpoint URI [%1$s] with binding part " +
-					"[%2$s] is not attached to a supported binding !",
-					endpointUri, bindingPart);
+			final String message = String.format("The endpoint URI [%1$s] with binding part "
+					+ "[%2$s] is not attached to a supported binding !", endpointUri, bindingPart);
 			throw new UnsupportedSamlOperation(message);
 		}
 
@@ -189,6 +186,7 @@ public class OpenSaml2QueryProcessorFactory implements IQueryProcessorFactory, I
 
 	/**
 	 * Extract SAML Object from request.
+	 * 
 	 * @param binding
 	 * 
 	 * @param messageContext
@@ -197,25 +195,25 @@ public class OpenSaml2QueryProcessorFactory implements IQueryProcessorFactory, I
 	 * @throws SamlProcessingException
 	 * @throws SamlSecurityException
 	 */
-	protected SAMLObject extractOpenSamlObjectFromRequest(final HttpServletRequest request, final SamlBindingEnum binding)
-			throws SamlProcessingException, SamlSecurityException {
+	protected SAMLObject extractOpenSamlObjectFromRequest(final HttpServletRequest request,
+			final SamlBindingEnum binding) throws SamlProcessingException, SamlSecurityException {
 		SAMLObject samlObject = null;
 		MessageContext messageContext = null;
 
 		try {
 			messageContext = this.buildMessageContext(request, binding);
-		} catch (SecurityException e) {
+		} catch (final SecurityException e) {
 			final String encodedSamlMessage = SamlHelper.getEncodedSamlMesage(request);
-			String securityMessage = String.format(
-					"Security problem while decoding SAML message: [%1$s] !", encodedSamlMessage);
+			final String securityMessage = String.format("Security problem while decoding SAML message: [%1$s] !",
+					encodedSamlMessage);
 			throw new SamlSecurityException(securityMessage, e);
-		} catch (MessageDecodingException e) {
+		} catch (final MessageDecodingException e) {
 			throw new SamlProcessingException("Unable to decode SAML message !", e);
 		}
 
 		Assert.notNull(messageContext, "MessageContext must be supplied !");
 
-		XMLObject inboundMessage = messageContext.getInboundMessage();
+		final XMLObject inboundMessage = messageContext.getInboundMessage();
 		if ((inboundMessage != null) && SAMLObject.class.isAssignableFrom(inboundMessage.getClass())) {
 			samlObject = (SAMLObject) inboundMessage;
 		} else {
@@ -224,7 +222,6 @@ public class OpenSaml2QueryProcessorFactory implements IQueryProcessorFactory, I
 
 		return samlObject;
 	}
-
 
 	/**
 	 * Build the SAML message context from a HttpServletRequest.
@@ -243,16 +240,15 @@ public class OpenSaml2QueryProcessorFactory implements IQueryProcessorFactory, I
 			throws SecurityException, MessageDecodingException {
 		Validate.notNull(request, "Request must be supplied !");
 
-		MessageContext messageContext = new BasicSAMLMessageContext();
+		final MessageContext messageContext = new BasicSAMLMessageContext();
 		messageContext.setInboundMessageTransport(new HttpServletRequestAdapter(request));
 
 		try {
-			SAMLMessageDecoder decoder = this.getSamlMessageDecoder(binding);
+			final SAMLMessageDecoder decoder = this.getSamlMessageDecoder(binding);
 			decoder.decode(messageContext);
-		} catch (SecurityException e) {
+		} catch (final SecurityException e) {
 			// Decoder throw SecurityException that we can skip
-			this.securityLogger.debug(
-					"Security problem while decoding incoming SAML message !", e);
+			this.securityLogger.debug("Security problem while decoding incoming SAML message !", e);
 			if (this.isAllowDecodingSecurityException()) {
 				throw e;
 			}
@@ -266,15 +262,15 @@ public class OpenSaml2QueryProcessorFactory implements IQueryProcessorFactory, I
 	/**
 	 * Retrieve the SAML message decoder attached to the binding.
 	 * 
-	 * @param binding the binding
+	 * @param binding
+	 *            the binding
 	 * @return the right SAML message decoder
 	 */
 	protected SAMLMessageDecoder getSamlMessageDecoder(final SamlBindingEnum binding) {
-		Map<SamlBindingEnum, SAMLMessageDecoder> samlMessageDecoders = this.getSamlMessageDecoders();
-		SAMLMessageDecoder decoder = samlMessageDecoders.get(binding);
+		final Map<SamlBindingEnum, SAMLMessageDecoder> samlMessageDecoders = this.getSamlMessageDecoders();
+		final SAMLMessageDecoder decoder = samlMessageDecoders.get(binding);
 		if (decoder == null) {
-			throw new IllegalStateException(String.format(
-					"No decoder configured for binding [%1$s] !", binding));
+			throw new IllegalStateException(String.format("No decoder configured for binding [%1$s] !", binding));
 		}
 		return samlMessageDecoders.get(binding);
 	}
@@ -349,6 +345,5 @@ public class OpenSaml2QueryProcessorFactory implements IQueryProcessorFactory, I
 	public void setClockSkewSeconds(final int clockSkewSeconds) {
 		this.clockSkewSeconds = clockSkewSeconds;
 	}
-
 
 }

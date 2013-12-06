@@ -56,6 +56,7 @@ import org.opensaml.xml.signature.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -85,6 +86,7 @@ import fr.mby.saml2.sp.opensaml.helper.OpenSamlHelper;
  * @author GIP RECIA 2012 - Maxime BOSSARD.
  * 
  */
+@Service
 public class OpenSaml20IdpConnector implements ISaml20IdpConnector, InitializingBean {
 
 	/** Logger. */

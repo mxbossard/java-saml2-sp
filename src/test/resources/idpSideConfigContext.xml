@@ -21,9 +21,9 @@
 	xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:util="http://www.springframework.org/schema/util"
 	xmlns:mockito="http://www.mockito.org/spring/mockito"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
-		http://www.mockito.org/spring/mockito classpath:spring/mockito.xsd">
+	xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
     <description>
     	Configuration for sign and encrypt as the IdP would do it.
     </description>
@@ -31,7 +31,7 @@
 	<import resource="classpath:samlResources.xml"/>
 	
 	<!-- Service Provider config -->
-	<bean id="spConfig" class="org.esco.sso.security.impl.CasSpConfig">
+	<bean id="spConfig" class="fr.mby.saml2.sp.impl.config.BasicSpConfig">
 		<property name="id" value="IdP" />
 		<property name="entityId" value="http://www.recia.fr/spHackedForSignAsIdp" />
 		<property name="spMetadata" value="classpath:saml/metadatas/sp_metadata_hackedForSignAsIdp.xml" />
@@ -47,7 +47,7 @@
 	</bean>
 	
 	<bean id="spProcessor"
-		class="org.esco.sso.security.saml.opensaml.OpenSaml20SpProcessor">
+		class="fr.mby.saml2.sp.opensaml.core.OpenSaml20SpProcessor">
 		<property name="spConfig" ref="spConfig" />
 
 		<property name="idpConnectors">
@@ -58,14 +58,18 @@
 		
 		<property name="queryProcessorFactory" ref="queryProcessorFactory" />
 		
+		<property name="singleLogoutHandler">
+			<bean class="fr.mby.saml2.sp.impl.handler.NullSingleLogoutHandler" />
+		</property>
+		
 		<!-- Mocks -->
-		<property name="cas" ref="cas" />
-		<property name="samlFacade" ref="samlFacade" />
-	</bean>
+		<property name="samlStorage" ref="samlStorage" />
+		
+		<!-- Mocked beans -->
+		<mockito:mock id="samlStorage" class="fr.mby.saml2.sp.api.core.ISaml20Storage" />
+		<mockito:mock id="idpConnector" class="fr.mby.saml2.sp.opensaml.core.OpenSaml20IdpConnector" />
+		<mockito:mock id="queryProcessorFactory" class="fr.mby.saml2.sp.opensaml.query.engine.OpenSaml2QueryProcessorFactory" />
 
-	<!-- Mocked beans -->
-	<mockito:mock id="cas" class="org.jasig.cas.CentralAuthenticationService" />
-	<mockito:mock id="samlFacade" class="org.esco.cas.ISaml20Facade" />
-	<mockito:mock id="idpConnector" class="org.esco.sso.security.saml.opensaml.OpenSaml20IdpConnector" />
-	<mockito:mock id="queryProcessorFactory" class="org.esco.sso.security.saml.opensaml.query.OpenSaml2QueryProcessorFactory" />
+	</bean>
+	
 </beans>

@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package fr.mby.saml2.sp.opensaml.query.engine;
 
 import org.opensaml.saml2.core.Issuer;
@@ -34,7 +35,7 @@ import fr.mby.saml2.sp.impl.query.QuerySloResponse;
  * OpenSaml 2 implementation of QueryProcessor for incoming SLO Response.
  * 
  * @author GIP RECIA 2013 - Maxime BOSSARD.
- *
+ * 
  */
 public class SloResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<QuerySloResponse, LogoutResponse> {
 
@@ -46,9 +47,8 @@ public class SloResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Query
 
 		try {
 			this.validateSignatureTrust(sloResponse, issuer, idpConnector);
-		} catch (NotSignedException e) {
-			throw new SamlSecurityException(
-					"The SLO Response cannot be trusted, signature is missing !");
+		} catch (final NotSignedException e) {
+			throw new SamlSecurityException("The SLO Response cannot be trusted, signature is missing !");
 		}
 	}
 
@@ -67,10 +67,9 @@ public class SloResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Query
 		final LogoutResponse sloResponse = this.getOpenSamlObject();
 
 		final String inResponseToId = sloResponse.getInResponseTo();
-		final QuerySloRequest originalRequest =
-				this.checkResponseLegitimacy(inResponseToId, QuerySloRequest.class);
+		final QuerySloRequest originalRequest = this.checkResponseLegitimacy(inResponseToId, QuerySloRequest.class);
 
-		QuerySloResponse query = new QuerySloResponse(sloResponse.getID());
+		final QuerySloResponse query = new QuerySloResponse(sloResponse.getID());
 		query.setInResponseToId(inResponseToId);
 		query.setOriginalRequest(originalRequest);
 

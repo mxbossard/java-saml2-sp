@@ -74,4 +74,5 @@ IvrAz7Uj/sa2JL83lYgJkNexbmV0c4o/PHI8D24st8zqrvLupKd/gydaMcLoog==</ds:X509Certifi
 			<saml:Attribute FriendlyName="ctemail" Name="ctemail" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
 				<saml:AttributeValue>testValue</saml:AttributeValue>
 			</saml:Attribute>
+		<!-- MBD: The following error is necessary for the attack ! -->
 		</saml:AttributeStatement></saml:Assertion></samlp:Response>

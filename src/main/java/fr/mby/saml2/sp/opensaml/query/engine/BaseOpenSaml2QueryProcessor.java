@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package fr.mby.saml2.sp.opensaml.query.engine;
 
 import javax.servlet.http.HttpServletRequest;
@@ -56,15 +57,16 @@ import fr.mby.saml2.sp.opensaml.helper.OpenSamlHelper;
  * Base implementation of Query Processor with OpenSaml 2 library.
  * 
  * @author GIP RECIA 2013 - Maxime BOSSARD.
- *
+ * 
  */
 public abstract class BaseOpenSaml2QueryProcessor<T extends IQuery, V extends SAMLObject>
-extends BaseSamlQueryProcessor<T> {
+		extends
+			BaseSamlQueryProcessor<T> {
 
 	/** Factory of the object. */
 	private OpenSaml2QueryProcessorFactory factory;
 
-	/** Binding used for the message.*/
+	/** Binding used for the message. */
 	private SamlBindingEnum binding;
 
 	/** OpenSaml representation of SAML message. */
@@ -88,13 +90,12 @@ extends BaseSamlQueryProcessor<T> {
 	}
 
 	@Override
-	protected String marshallSamlMessage()
-			throws SamlProcessingException, SamlSecurityException {
+	protected String marshallSamlMessage() throws SamlProcessingException, SamlSecurityException {
 		String samlMessage = null;
 
 		try {
 			samlMessage = OpenSamlHelper.marshallXmlObject(this.openSamlObject);
-		} catch (MarshallingException e) {
+		} catch (final MarshallingException e) {
 			throw new SamlProcessingException("OpenSaml object marshalling problem !", e);
 		}
 
@@ -108,13 +109,17 @@ extends BaseSamlQueryProcessor<T> {
 	}
 
 	/**
-	 * Validate a Saml2 signature if a signature profile validator was provided.
-	 * Verify a Saml2 signature with IdP Metadata.
+	 * Validate a Saml2 signature if a signature profile validator was provided. Verify a Saml2 signature with IdP
+	 * Metadata.
 	 * 
-	 * @param signableObject the Saml 2.0 Response to validate and verify.
-	 * @param issuer issuer of the message
-	 * @throws NotSignedException if no signature present
-	 * @throws SamlSecurityException if saml security problem
+	 * @param signableObject
+	 *            the Saml 2.0 Response to validate and verify.
+	 * @param issuer
+	 *            issuer of the message
+	 * @throws NotSignedException
+	 *             if no signature present
+	 * @throws SamlSecurityException
+	 *             if saml security problem
 	 */
 	protected void validateSignatureTrust(final SignableSAMLObject signableObject, final Issuer issuer,
 			final ISaml20IdpConnector idpConnector) throws NotSignedException, SamlSecurityException {
@@ -125,7 +130,7 @@ extends BaseSamlQueryProcessor<T> {
 			final CriteriaSet criteriaSet = new CriteriaSet();
 			criteriaSet.add(new EntityIDCriteria(issuer.getValue()));
 
-			Signature signature = signableObject.getSignature();
+			final Signature signature = signableObject.getSignature();
 			if ((signature == null) || signature.isNil()) {
 				throw new NotSignedException("The signature is missing !");
 			}
@@ -134,7 +139,7 @@ extends BaseSamlQueryProcessor<T> {
 			if (signatureValidator != null) {
 				try {
 					signatureValidator.validate(signature);
-				} catch (ValidationException e) {
+				} catch (final ValidationException e) {
 					throw new SamlSecurityException("Signature is not a valid XML element !", e);
 				}
 			}
@@ -147,7 +152,7 @@ extends BaseSamlQueryProcessor<T> {
 			boolean isSignatureTrusted = false;
 			try {
 				isSignatureTrusted = signatureTrustEngine.validate(signature, criteriaSet);
-			} catch (SecurityException e) {
+			} catch (final SecurityException e) {
 				throw new SamlSecurityException("Unable to validate signature trust !", e);
 			}
 			if (!isSignatureTrusted) {
@@ -166,23 +171,24 @@ extends BaseSamlQueryProcessor<T> {
 	 */
 	protected void validateConditions(final Assertion assertion) throws SamlValidationException {
 		if (assertion != null) {
-			Conditions conditions = assertion.getConditions();
-			int clockSkew = this.getFactory().getClockSkewSeconds();
-			SamlValidationHelper.validateTimes(clockSkew,
-					conditions.getNotBefore(), conditions.getNotOnOrAfter());
+			final Conditions conditions = assertion.getConditions();
+			final int clockSkew = this.getFactory().getClockSkewSeconds();
+			SamlValidationHelper.validateTimes(clockSkew, conditions.getNotBefore(), conditions.getNotOnOrAfter());
 		}
 	}
 
 	/**
 	 * Find the IdP Connector to use to process the message.
 	 * 
-	 * @param issuer the issuer of the SAML message
+	 * @param issuer
+	 *            the issuer of the SAML message
 	 * @return the IdP connector (cannot be null)
-	 * @throws SamlSecurityException if no IdP connector found
+	 * @throws SamlSecurityException
+	 *             if no IdP connector found
 	 */
 	protected ISaml20IdpConnector findIdpConnector(final Issuer issuer) throws SamlSecurityException {
 		Assert.notNull(issuer, "No issuer provided !");
-		ISaml20IdpConnector connector = this.getSpProcessor().findSaml20IdpConnectorToUse(issuer.getValue());
+		final ISaml20IdpConnector connector = this.getSpProcessor().findSaml20IdpConnectorToUse(issuer.getValue());
 
 		if (connector == null) {
 			throw new SamlSecurityException("IdP Connector not found !");

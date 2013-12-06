@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -47,6 +48,7 @@ import fr.mby.saml2.sp.impl.helper.SamlHelper;
  * @author Maxime Bossard - 2013
  * 
  */
+@Service
 public class BasicSaml20SpFacade implements ISaml20SpFacade, InitializingBean {
 
 	/** Logger. */

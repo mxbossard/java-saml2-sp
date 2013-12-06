@@ -23,7 +23,7 @@
 	xmlns:mockito="http://www.mockito.org/spring/mockito"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
-		http://www.mockito.org/spring/mockito classpath:spring/mockito.xsd">
+		http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
     <description>
     	Configuration for the OpenSaml SAML 2.0 Processos.
     </description>
@@ -31,19 +31,19 @@
     <import resource="classpath:samlResources.xml"/>
 	
 	<!-- Query Processors -->
-	<bean id="authnRespQueryProcessor" class="org.esco.sso.security.saml.opensaml.query.AuthnResponseQueryProcessor" scope="prototype">
+	<bean id="authnRespQueryProcessor" class="fr.mby.saml2.sp.opensaml.query.engine.AuthnResponseQueryProcessor" scope="prototype">
 		<property name="endpointLocation" value="/cas/Shibboleth.sso/SAML2" />
 	</bean>
 	
-	<bean id="sloRespQueryProcessor" class="org.esco.sso.security.saml.opensaml.query.SloResponseQueryProcessor" scope="prototype">
+	<bean id="sloRespQueryProcessor" class="fr.mby.saml2.sp.opensaml.query.engine.SloResponseQueryProcessor" scope="prototype">
 		<property name="endpointLocation" value="/cas/Shibboleth.sso/SLO" />
 	</bean>
 
-	<bean id="sloReqQueryProcessor" class="org.esco.sso.security.saml.opensaml.query.SloRequestQueryProcessor" scope="prototype">
+	<bean id="sloReqQueryProcessor" class="fr.mby.saml2.sp.opensaml.query.engine.SloRequestQueryProcessor" scope="prototype">
 		<property name="endpointLocation" value="/cas/Shibboleth.sso/SLO" />
 	</bean>
 
-	<bean id="queryProcessorFactory" class="org.esco.sso.security.saml.opensaml.query.OpenSaml2QueryProcessorFactory">
+	<bean id="queryProcessorFactory" class="fr.mby.saml2.sp.opensaml.query.engine.OpenSaml2QueryProcessorFactory">
 		<property name="clockSkewSeconds" value="60" />
 		<property name="samlMessageDecoders" ref="samlMessageDecoders" />
 		<property name="signatureValidator" ref="samlSignatureProfileValidator" />

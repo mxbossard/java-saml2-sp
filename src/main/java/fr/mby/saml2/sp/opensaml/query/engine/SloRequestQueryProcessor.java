@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package fr.mby.saml2.sp.opensaml.query.engine;
 
 import java.io.IOException;
@@ -58,7 +59,7 @@ import fr.mby.saml2.sp.impl.query.QuerySloRequest;
  * OpenSaml 2 implementation of QueryProcessor for incoming SLO Response.
  * 
  * @author GIP RECIA 2013 - Maxime BOSSARD.
- *
+ * 
  */
 public class SloRequestQueryProcessor extends BaseOpenSaml2QueryProcessor<QuerySloRequest, LogoutRequest> {
 
@@ -73,9 +74,8 @@ public class SloRequestQueryProcessor extends BaseOpenSaml2QueryProcessor<QueryS
 
 		try {
 			this.validateSignatureTrust(sloRequest, issuer, idpConnector);
-		} catch (NotSignedException e) {
-			throw new SamlSecurityException(
-					"The SLO Request cannot be trusted, signature is missing !");
+		} catch (final NotSignedException e) {
+			throw new SamlSecurityException("The SLO Request cannot be trusted, signature is missing !");
 		}
 	}
 
@@ -83,8 +83,8 @@ public class SloRequestQueryProcessor extends BaseOpenSaml2QueryProcessor<QueryS
 	protected void validateConditions() throws SamlValidationException {
 		final LogoutRequest sloRequest = this.getOpenSamlObject();
 
-		int clockSkew = this.getFactory().getClockSkewSeconds();
-		DateTime notOnOrAfter = sloRequest.getNotOnOrAfter();
+		final int clockSkew = this.getFactory().getClockSkewSeconds();
+		final DateTime notOnOrAfter = sloRequest.getNotOnOrAfter();
 		SamlValidationHelper.validateTimes(clockSkew, null, notOnOrAfter);
 	}
 
@@ -94,9 +94,9 @@ public class SloRequestQueryProcessor extends BaseOpenSaml2QueryProcessor<QueryS
 		final ISaml20SpProcessor spProcessor = this.getSpProcessor();
 
 		// Logout from SP
-		List<SessionIndex> sessionIndexes = sloRequest.getSessionIndexes();
+		final List<SessionIndex> sessionIndexes = sloRequest.getSessionIndexes();
 		if (!CollectionUtils.isEmpty(sessionIndexes)) {
-			for (SessionIndex sessionIndex : sessionIndexes) {
+			for (final SessionIndex sessionIndex : sessionIndexes) {
 				spProcessor.logout(sessionIndex.getSessionIndex());
 			}
 		}
@@ -104,10 +104,10 @@ public class SloRequestQueryProcessor extends BaseOpenSaml2QueryProcessor<QueryS
 		// Send SLO Response
 		try {
 			final SamlBindingEnum binding = SamlBindingEnum.SAML_20_HTTP_POST;
-			ISaml20IdpConnector idpConnector = this.findIdpConnector(sloRequest.getIssuer());
-			IOutgoingSaml sloResponseRequest = this.buildOutgoingSloResponse(sloRequest, binding , idpConnector);
+			final ISaml20IdpConnector idpConnector = this.findIdpConnector(sloRequest.getIssuer());
+			final IOutgoingSaml sloResponseRequest = this.buildOutgoingSloResponse(sloRequest, binding, idpConnector);
 			this.sendSloResponse(binding, sloResponseRequest);
-		} catch (SamlBuildingException e) {
+		} catch (final SamlBuildingException e) {
 			throw new SamlProcessingException("Unable to build SLO Response to send back to the IdP !", e);
 		}
 	}
@@ -125,117 +125,116 @@ public class SloRequestQueryProcessor extends BaseOpenSaml2QueryProcessor<QueryS
 	/**
 	 * Build a SLO Response to send, based on a SLO request.
 	 * 
-	 * @param request the HTTP request
-	 * @param binding the SLO Request binding
+	 * @param request
+	 *            the HTTP request
+	 * @param binding
+	 *            the SLO Request binding
 	 * @return the SLO Response to return to the IdP
 	 * @throws SamlBuildingException
 	 */
-	protected IOutgoingSaml buildOutgoingSloResponse(final LogoutRequest logoutRequest,
-			final SamlBindingEnum binding, final ISaml20IdpConnector idpConnector)
-					throws SamlBuildingException {
+	protected IOutgoingSaml buildOutgoingSloResponse(final LogoutRequest logoutRequest, final SamlBindingEnum binding,
+			final ISaml20IdpConnector idpConnector) throws SamlBuildingException {
 		Assert.notNull(logoutRequest, "SLO Request must be supplied !");
 
 		final String relayState = SamlHelper.getRelayState(this.getHttpRequest());
 		final String originRequestId = logoutRequest.getID();
-		IOutgoingSaml sloResponseRequest = idpConnector.buildSaml20SingleLogoutResponse(
-				binding, originRequestId, relayState);
+		final IOutgoingSaml sloResponseRequest = idpConnector.buildSaml20SingleLogoutResponse(binding, originRequestId,
+				relayState);
 
 		this.logger.debug("SAML 2.0 Logout Response processing ended.");
 		return sloResponseRequest;
 	}
 
-
 	/**
 	 * Send the SLO Response via the URL Api.
 	 * 
-	 * @param binding the binding to use
-	 * @param sloResponseRequest the SLO Response request
+	 * @param binding
+	 *            the binding to use
+	 * @param sloResponseRequest
+	 *            the SLO Response request
 	 */
 	protected void sendSloResponse(final SamlBindingEnum binding, final IOutgoingSaml sloResponseRequest) {
 		URL sloUrl = null;
 		HttpURLConnection sloConnexion = null;
 
 		try {
-			switch(binding) {
-			case SAML_20_HTTP_REDIRECT:
-				String redirectUrl = sloResponseRequest.getHttpRedirectBindingUrl();
+			switch (binding) {
+				case SAML_20_HTTP_REDIRECT :
+					final String redirectUrl = sloResponseRequest.getHttpRedirectBindingUrl();
 
-				sloUrl = new URL(redirectUrl);
-				sloConnexion = (HttpURLConnection) sloUrl.openConnection();
-				sloConnexion.setReadTimeout(10000);
-				sloConnexion.connect();
-				break;
+					sloUrl = new URL(redirectUrl);
+					sloConnexion = (HttpURLConnection) sloUrl.openConnection();
+					sloConnexion.setReadTimeout(10000);
+					sloConnexion.connect();
+					break;
 
-			case SAML_20_HTTP_POST:
-				String sloEndpointUrl = sloResponseRequest.getEndpointUrl();
-				Collection<Entry<String, String>> sloPostParams = sloResponseRequest.getHttpPostBindingParams();
-				StringBuffer samlDatas = new StringBuffer(1024);
-				Iterator<Entry<String, String>> itParams = sloPostParams.iterator();
-				Entry<String, String> firstParam = itParams.next();
-				samlDatas.append(firstParam.getKey());
-				samlDatas.append("=");
-				samlDatas.append(firstParam.getValue());
-				while (itParams.hasNext()) {
-					Entry<String, String> param = itParams.next();
-					samlDatas.append("&");
-					samlDatas.append(param.getKey());
+				case SAML_20_HTTP_POST :
+					final String sloEndpointUrl = sloResponseRequest.getEndpointUrl();
+					final Collection<Entry<String, String>> sloPostParams = sloResponseRequest
+							.getHttpPostBindingParams();
+					final StringBuffer samlDatas = new StringBuffer(1024);
+					final Iterator<Entry<String, String>> itParams = sloPostParams.iterator();
+					final Entry<String, String> firstParam = itParams.next();
+					samlDatas.append(firstParam.getKey());
 					samlDatas.append("=");
-					samlDatas.append(param.getValue());
-				}
+					samlDatas.append(firstParam.getValue());
+					while (itParams.hasNext()) {
+						final Entry<String, String> param = itParams.next();
+						samlDatas.append("&");
+						samlDatas.append(param.getKey());
+						samlDatas.append("=");
+						samlDatas.append(param.getValue());
+					}
 
-				sloUrl = new URL(sloEndpointUrl);
-				sloConnexion = (HttpURLConnection) sloUrl.openConnection();
-				sloConnexion.setDoInput(true);
+					sloUrl = new URL(sloEndpointUrl);
+					sloConnexion = (HttpURLConnection) sloUrl.openConnection();
+					sloConnexion.setDoInput(true);
 
-				OutputStreamWriter writer = new OutputStreamWriter(sloConnexion.getOutputStream());
-				writer.write(samlDatas.toString());
-				writer.flush();
-				writer.close();
+					final OutputStreamWriter writer = new OutputStreamWriter(sloConnexion.getOutputStream());
+					writer.write(samlDatas.toString());
+					writer.flush();
+					writer.close();
 
-				sloConnexion.setReadTimeout(10000);
-				sloConnexion.connect();
-				break;
+					sloConnexion.setReadTimeout(10000);
+					sloConnexion.connect();
+					break;
 
-			default:
-				break;
+				default :
+					break;
 			}
 
 			if (sloConnexion != null) {
-				InputStream responseStream = sloConnexion.getInputStream();
+				final InputStream responseStream = sloConnexion.getInputStream();
 
-				StringWriter writer = new StringWriter();
+				final StringWriter writer = new StringWriter();
 				IOUtils.copy(responseStream, writer, "UTF-8");
-				String response = writer.toString();
+				final String response = writer.toString();
 
 				this.logger.debug(String.format("HTTP response to SLO Request sent: [%s] ", response));
 
-				int responseCode = sloConnexion.getResponseCode();
+				final int responseCode = sloConnexion.getResponseCode();
 
-				String samlMessage = sloResponseRequest.getSamlMessage();
-				String endpointUrl = sloResponseRequest.getEndpointUrl();
+				final String samlMessage = sloResponseRequest.getSamlMessage();
+				final String endpointUrl = sloResponseRequest.getEndpointUrl();
 				if (responseCode < 0) {
 					this.logger.error("Unable to send SAML 2.0 Single Logout Response [{}] to endpoint URL [{}] !",
 							samlMessage, endpointUrl);
 				} else if (responseCode == 200) {
-					this.logger.info("SAML 2.0 Single Logout Request correctly sent to [{}] !",
-							endpointUrl);
+					this.logger.info("SAML 2.0 Single Logout Request correctly sent to [{}] !", endpointUrl);
 				} else {
-					this.logger.error(
-							"HTTP response code: [{}] ! Error while sending SAML 2.0 Single Logout Request [{}] to endpoint URL [{}] !",
-							new Object[]{responseCode, samlMessage, endpointUrl});
+					this.logger
+							.error("HTTP response code: [{}] ! Error while sending SAML 2.0 Single Logout Request [{}] to endpoint URL [{}] !",
+									new Object[]{responseCode, samlMessage, endpointUrl});
 				}
 			}
 
-		} catch (MalformedURLException e) {
-			this.logger.error(String.format("Malformed SAML SLO request URL: [%s] !",
-					sloUrl.toExternalForm()), e);
-		} catch (IOException e) {
-			this.logger.error(String.format("Unable to send SAML SLO request URL: [%s] !",
-					sloUrl.toExternalForm()), e);
+		} catch (final MalformedURLException e) {
+			this.logger.error(String.format("Malformed SAML SLO request URL: [%s] !", sloUrl.toExternalForm()), e);
+		} catch (final IOException e) {
+			this.logger.error(String.format("Unable to send SAML SLO request URL: [%s] !", sloUrl.toExternalForm()), e);
 		} finally {
 			sloConnexion.disconnect();
 		}
 	}
-
 
 }

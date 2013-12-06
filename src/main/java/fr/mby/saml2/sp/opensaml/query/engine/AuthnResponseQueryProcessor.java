@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package fr.mby.saml2.sp.opensaml.query.engine;
 
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ import fr.mby.saml2.sp.opensaml.helper.OpenSamlHelper;
  * OpenSaml 2 implementation of QueryProcessor for incoming AuthnResponse.
  * 
  * @author GIP RECIA 2013 - Maxime BOSSARD.
- *
+ * 
  */
 public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<QueryAuthnResponse, Response> {
 
@@ -83,7 +84,7 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 		final Response authnResponse = this.getOpenSamlObject();
 		try {
 			this.assertions = this.retrieveAllAssertions(authnResponse);
-		} catch (DecryptionException e) {
+		} catch (final DecryptionException e) {
 			throw new SamlProcessingException("Decryption problem encoutered", e);
 		}
 
@@ -104,17 +105,17 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 		try {
 			this.validateSignatureTrust(authnResponse, authnResponse.getIssuer(), idpConnector);
 			responseSigned = true;
-		} catch (NotSignedException e) {
+		} catch (final NotSignedException e) {
 			// If the response signature is absent, try to check assertions signature...
-			this.logger.debug("Unable to validate AuthnResponse signature trust ! " +
-					"We will try to validate the assertions signatures ...", e);
+			this.logger.debug("Unable to validate AuthnResponse signature trust ! "
+					+ "We will try to validate the assertions signatures ...", e);
 		}
 
 		// Validate Assertions signature
-		for (Assertion assertion : this.assertions) {
+		for (final Assertion assertion : this.assertions) {
 			try {
 				this.validateSignatureTrust(assertion, assertion.getIssuer(), idpConnector);
-			} catch (NotSignedException e) {
+			} catch (final NotSignedException e) {
 				// If the response signature and assertion signature is missing => Security problem !
 				if (!responseSigned) {
 					throw new SamlSecurityException(
@@ -128,7 +129,7 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 	@Override
 	protected void validateConditions() throws SamlValidationException {
 		// Validate Assertions conditions
-		for (Assertion assertion : this.assertions) {
+		for (final Assertion assertion : this.assertions) {
 			this.validateConditions(assertion);
 		}
 	}
@@ -149,10 +150,9 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 		Assert.notNull(this.authentications, "Authentications list wasn't build yet !");
 
 		final String inResponseToId = authnResponse.getInResponseTo();
-		final QueryAuthnRequest originalRequest =
-				this.checkResponseLegitimacy(inResponseToId, QueryAuthnRequest.class);
+		final QueryAuthnRequest originalRequest = this.checkResponseLegitimacy(inResponseToId, QueryAuthnRequest.class);
 
-		QueryAuthnResponse query = new QueryAuthnResponse(authnResponse.getID());
+		final QueryAuthnResponse query = new QueryAuthnResponse(authnResponse.getID());
 		query.setInResponseToId(inResponseToId);
 		query.setOriginalRequest(originalRequest);
 		query.setSamlAuthentications(this.authentications);
@@ -161,8 +161,7 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 	}
 
 	/**
-	 * Retrieve all assertions, normal ones and encrypted ones if a private key
-	 * was provided.
+	 * Retrieve all assertions, normal ones and encrypted ones if a private key was provided.
 	 * 
 	 * @param samlResponse
 	 *            the saml response containing the assertions.
@@ -171,22 +170,22 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 	 *             in case of decryption problem.
 	 * @throws UnsupportedSamlOperation
 	 */
-	protected List<Assertion> retrieveAllAssertions(final Response samlResponse)
-			throws DecryptionException, UnsupportedSamlOperation {
-		List<Assertion> allAssertions = new ArrayList<Assertion>();
+	protected List<Assertion> retrieveAllAssertions(final Response samlResponse) throws DecryptionException,
+			UnsupportedSamlOperation {
+		final List<Assertion> allAssertions = new ArrayList<Assertion>();
 
 		if (samlResponse != null) {
 			// Normal Assertions
-			List<Assertion> normalAssertions = samlResponse.getAssertions();
+			final List<Assertion> normalAssertions = samlResponse.getAssertions();
 			if (!CollectionUtils.isEmpty(normalAssertions)) {
 				allAssertions.addAll(normalAssertions);
 			}
 
 			// Encrypted Assertions
-			List<EncryptedAssertion> encAssertions = samlResponse.getEncryptedAssertions();
+			final List<EncryptedAssertion> encAssertions = samlResponse.getEncryptedAssertions();
 			if (!CollectionUtils.isEmpty(encAssertions)) {
-				for (EncryptedAssertion encAssertion : samlResponse.getEncryptedAssertions()) {
-					Assertion assertion = this.decryptAssertion(encAssertion);
+				for (final EncryptedAssertion encAssertion : samlResponse.getEncryptedAssertions()) {
+					final Assertion assertion = this.decryptAssertion(encAssertion);
 
 					allAssertions.add(assertion);
 				}
@@ -203,8 +202,8 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 	 * @throws DecryptionException
 	 * @throws UnsupportedSamlOperation
 	 */
-	private Assertion decryptAssertion(final EncryptedAssertion encAssertion)
-			throws DecryptionException, UnsupportedSamlOperation {
+	private Assertion decryptAssertion(final EncryptedAssertion encAssertion) throws DecryptionException,
+			UnsupportedSamlOperation {
 		Assertion assertion = null;
 
 		if (encAssertion != null) {
@@ -216,7 +215,7 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 			if (this.logger.isDebugEnabled()) {
 				try {
 					this.logger.debug("Decrypted Assertion: [{}]", OpenSamlHelper.marshallXmlObject(assertion));
-				} catch (MarshallingException e) {
+				} catch (final MarshallingException e) {
 					this.logger.error("Unable to marshall decrypted Assertion for debugging purpose !");
 				}
 			}
@@ -232,20 +231,19 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 	 * @throws DecryptionException
 	 * @throws UnsupportedSamlOperation
 	 */
-	private void decryptIdentifier(final Assertion assertion)
-			throws DecryptionException, UnsupportedSamlOperation {
+	private void decryptIdentifier(final Assertion assertion) throws DecryptionException, UnsupportedSamlOperation {
 		if (assertion != null) {
 			final Subject subject = assertion.getSubject();
 
-			EncryptedID encryptedId = subject.getEncryptedID();
+			final EncryptedID encryptedId = subject.getEncryptedID();
 			if (encryptedId != null) {
 				final ISaml20SpProcessor spProcessor = this.getSpProcessor();
 				final Decrypter decrypter = spProcessor.getDecrypter();
 				final SAMLObject identifier = decrypter.decrypt(encryptedId);
 				if ((identifier == null) || !NameID.class.isAssignableFrom(identifier.getClass())) {
 					// Encrypted ID not a NameID !
-					final String message = String.format("Encrypted ID type not supported: [%1$s] ! " +
-							"Only NameID is currently supported !", identifier.getClass());
+					final String message = String.format("Encrypted ID type not supported: [%1$s] ! "
+							+ "Only NameID is currently supported !", identifier.getClass());
 					throw new UnsupportedSamlOperation(message);
 				}
 
@@ -271,12 +269,12 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 
 			final List<AttributeStatement> attributeStmts = assertion.getAttributeStatements();
 			if (!CollectionUtils.isEmpty(attributeStmts)) {
-				for (AttributeStatement attributeStmt : attributeStmts) {
-					final Iterator<EncryptedAttribute> encryptAttrIt =
-							attributeStmt.getEncryptedAttributes().iterator();
+				for (final AttributeStatement attributeStmt : attributeStmts) {
+					final Iterator<EncryptedAttribute> encryptAttrIt = attributeStmt.getEncryptedAttributes()
+							.iterator();
 
 					while (encryptAttrIt.hasNext()) {
-						EncryptedAttribute encryptedAttribute = encryptAttrIt.next();
+						final EncryptedAttribute encryptedAttribute = encryptAttrIt.next();
 						// For every encrypted attribute
 						final Attribute attribute = decrypter.decrypt(encryptedAttribute);
 
@@ -304,12 +302,13 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 	 */
 	protected List<IAuthentication> extractSamlAuthentications(final Response authnResponse)
 			throws SamlSecurityException, UnsupportedSamlOperation, SamlProcessingException {
-		List<IAuthentication> authentications = new ArrayList<IAuthentication>();
+		final List<IAuthentication> authentications = new ArrayList<IAuthentication>();
 
 		Assert.notEmpty(this.assertions, "Assertions not already processed !");
 
 		try {
-			// Our Authn Response could carry multiple assertions, we are interressed only by an AuthnStatement Assertion.
+			// Our Authn Response could carry multiple assertions, we are interressed only by an AuthnStatement
+			// Assertion.
 			for (final Assertion assertion : this.assertions) {
 				// We look for an AuthnStatement Assertion !
 				final List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
@@ -322,23 +321,23 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 							throw new UnsupportedSamlOperation(
 									"Subject NameID missing other ID types are not supported !");
 						}
-	
-						BasicSamlAuthentication authn = new BasicSamlAuthentication();
+
+						final BasicSamlAuthentication authn = new BasicSamlAuthentication();
 						authn.setAuthenticationInstant(authnStatement.getAuthnInstant());
 						authn.setSubjectId(nameId.getValue());
 						authn.setSessionIndex(authnStatement.getSessionIndex());
-	
+
 						this.processAuthnAttributes(assertion, authn);
-	
+
 						// Add the authentication to the list
 						authn.lock();
 						authentications.add(authn);
 					}
 				}
 			}
-		} catch (SamlValidationException e) {
+		} catch (final SamlValidationException e) {
 			throw new SamlProcessingException("Validation of Assertion Subjet failed !", e);
-		} catch (DecryptionException e) {
+		} catch (final DecryptionException e) {
 			throw new SamlProcessingException("Decryption of SAML Assertions failed !", e);
 		}
 
@@ -348,16 +347,17 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 	/**
 	 * Retrieve a unique AuthnStatement in an assertion.
 	 * 
-	 * @param assertionsession assertion
+	 * @param assertionsession
+	 *            assertion
 	 * @return the AuthnStatement of this assertion (can be null)
-	 * @throws UnsupportedSamlOperation if multiple AuthnStatement found
+	 * @throws UnsupportedSamlOperation
+	 *             if multiple AuthnStatement found
 	 */
-	protected AuthnStatement retrieveAuthnStatement(final Assertion assertion)
-			throws UnsupportedSamlOperation {
+	protected AuthnStatement retrieveAuthnStatement(final Assertion assertion) throws UnsupportedSamlOperation {
 		AuthnStatement authnStatement = null;
 
 		if (assertion != null) {
-			List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
+			final List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
 
 			if (authnStatements.size() > 1) {
 				throw new UnsupportedSamlOperation(
@@ -381,8 +381,8 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 	 * @throws DecryptionException
 	 * @throws UnsupportedSamlOperation
 	 */
-	protected Subject validateAndRetrieveSubject(final Assertion assertion)
-			throws SamlValidationException, DecryptionException, UnsupportedSamlOperation {
+	protected Subject validateAndRetrieveSubject(final Assertion assertion) throws SamlValidationException,
+			DecryptionException, UnsupportedSamlOperation {
 		Subject subject = null;
 		if (assertion != null) {
 			subject = assertion.getSubject();
@@ -397,12 +397,11 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 			// Check subject confirmations
 			subjectConfirmations = subject.getSubjectConfirmations();
 			if (!CollectionUtils.isEmpty(subjectConfirmations)) {
-				for (SubjectConfirmation subjectConfirmation : subjectConfirmations) {
+				for (final SubjectConfirmation subjectConfirmation : subjectConfirmations) {
 					if (subjectConfirmation != null) {
 						scData = subjectConfirmation.getSubjectConfirmationData();
-						int clockSkew = this.getFactory().getClockSkewSeconds();
-						SamlValidationHelper.validateTimes(clockSkew,
-								scData.getNotBefore(), scData.getNotOnOrAfter());
+						final int clockSkew = this.getFactory().getClockSkewSeconds();
+						SamlValidationHelper.validateTimes(clockSkew, scData.getNotBefore(), scData.getNotOnOrAfter());
 					}
 				}
 			}
@@ -416,22 +415,23 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 	/**
 	 * Add each assertion attributes and its values in the authentication data object.
 	 * 
-	 * @param assertion the assertion
-	 * @param authn the authentication data object
+	 * @param assertion
+	 *            the assertion
+	 * @param authn
+	 *            the authentication data object
 	 * @throws DecryptionException
 	 * @throws SamlSecurityException
 	 */
-	protected void processAuthnAttributes(final Assertion assertion,
-			final IAuthentication authn)
-					throws SamlSecurityException, DecryptionException {
-		List<Attribute> attributes = this.retrieveAttributes(assertion);
+	protected void processAuthnAttributes(final Assertion assertion, final IAuthentication authn)
+			throws SamlSecurityException, DecryptionException {
+		final List<Attribute> attributes = this.retrieveAttributes(assertion);
 		if (!CollectionUtils.isEmpty(attributes)) {
-			for (Attribute attr : attributes) {
+			for (final Attribute attr : attributes) {
 				if (attr != null) {
-					List<String> values = new ArrayList<String>();
-					for (XMLObject value : attr.getAttributeValues()) {
+					final List<String> values = new ArrayList<String>();
+					for (final XMLObject value : attr.getAttributeValues()) {
 						if (value != null) {
-							String textContent = value.getDOM().getTextContent();
+							final String textContent = value.getDOM().getTextContent();
 							if (StringUtils.hasText(textContent)) {
 								values.add(textContent);
 							}
@@ -455,18 +455,17 @@ public class AuthnResponseQueryProcessor extends BaseOpenSaml2QueryProcessor<Que
 	 * @return the list of all attributes.
 	 * @throws DecryptionException
 	 */
-	protected List<Attribute> retrieveAttributes(final Assertion assertion)
-			throws DecryptionException {
-		List<Attribute> attributes = new ArrayList<Attribute>();
+	protected List<Attribute> retrieveAttributes(final Assertion assertion) throws DecryptionException {
+		final List<Attribute> attributes = new ArrayList<Attribute>();
 
 		this.decryptAttributes(assertion);
 
 		if (assertion != null) {
-			List<AttributeStatement> statements = assertion.getAttributeStatements();
+			final List<AttributeStatement> statements = assertion.getAttributeStatements();
 			if (!CollectionUtils.isEmpty(statements)) {
-				for (AttributeStatement statement : statements) {
+				for (final AttributeStatement statement : statements) {
 					// Get all attributes from statement
-					List<Attribute> attrs = statement.getAttributes();
+					final List<Attribute> attrs = statement.getAttributes();
 					if (!CollectionUtils.isEmpty(attrs)) {
 						attributes.addAll(attrs);
 					}

@@ -28,6 +28,7 @@ import net.sf.ehcache.Element;
 import org.esco.cas.authentication.principal.ISaml20Credentials;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.ehcache.EhCacheFactoryBean;
+import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import fr.mby.saml2.sp.api.core.ISaml20Storage;
@@ -38,6 +39,7 @@ import fr.mby.saml2.sp.api.core.ISaml20Storage;
  * @author GIP RECIA 2012 - Maxime BOSSARD.
  * 
  */
+@Repository
 public class EhcacheSaml20Storage implements ISaml20Storage, InitializingBean {
 
 	/** SAML 2.0 Authentication credentials cache name. */
