@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package fr.mby.saml2.sp.impl.helper;
 
 import java.io.IOException;
@@ -40,32 +41,30 @@ import org.springframework.core.io.Resource;
  * Helper for security manipulation.
  * 
  * @author GIP RECIA 2012 - Maxime BOSSARD.
- *
+ * 
  */
-public class SecurityHelper {
+public abstract class SecurityHelper {
 
 	/** Logger. */
 	@SuppressWarnings("unused")
 	private static final Log LOGGER = LogFactory.getLog(SecurityHelper.class);
 
-	/** Hidden constructor. */
-	private SecurityHelper() {
-
-	}
-
 	/**
 	 * Build a certificate from PEM resource.
 	 * 
-	 * @param certificate the PEM resource
-	 * @param type the certificate type
+	 * @param certificate
+	 *            the PEM resource
+	 * @param type
+	 *            the certificate type
 	 * @return the java.security.cert.Certificate
 	 * @throws CertificateException
 	 * @throws IOException
 	 */
-	public static Certificate buildCertificate(final Resource certificate, final String type) throws CertificateException, IOException {
+	public static Certificate buildCertificate(final Resource certificate, final String type)
+			throws CertificateException, IOException {
 		Certificate result = null;
 
-		CertificateFactory certFactory = CertificateFactory.getInstance(type);
+		final CertificateFactory certFactory = CertificateFactory.getInstance(type);
 		result = certFactory.generateCertificate(certificate.getInputStream());
 
 		return result;
@@ -74,9 +73,12 @@ public class SecurityHelper {
 	/**
 	 * Build a private Key from DER resource.
 	 * 
-	 * @param certificate the DER resource
-	 * @param pkSpecClass the java key specification class
-	 * @param type the certificate type
+	 * @param certificate
+	 *            the DER resource
+	 * @param pkSpecClass
+	 *            the java key specification class
+	 * @param type
+	 *            the certificate type
 	 * @return the java.security.cert.Certificate
 	 * @throws NoSuchMethodException
 	 * @throws SecurityException
@@ -88,14 +90,17 @@ public class SecurityHelper {
 	 * @throws InvalidKeySpecException
 	 * @throws IOException
 	 */
-	public static PrivateKey buildPrivateKey(final Resource privateKey, final Class<EncodedKeySpec> pkSpecClass, final String type) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+	public static PrivateKey buildPrivateKey(final Resource privateKey, final Class<EncodedKeySpec> pkSpecClass,
+			final String type) throws SecurityException, NoSuchMethodException, IllegalArgumentException,
+			InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchAlgorithmException,
+			InvalidKeySpecException, IOException {
 		PrivateKey result = null;
 
-		Constructor<EncodedKeySpec> keySpecConstructor = pkSpecClass.getConstructor(byte[].class);
-		byte[] keyBytes = SecurityHelper.readBytesFromFilePath(privateKey);
+		final Constructor<EncodedKeySpec> keySpecConstructor = pkSpecClass.getConstructor(byte[].class);
+		final byte[] keyBytes = SecurityHelper.readBytesFromFilePath(privateKey);
 		if (keyBytes != null) {
-			EncodedKeySpec keySpec = keySpecConstructor.newInstance(keyBytes);
-			KeyFactory pkFactory = KeyFactory.getInstance(type);
+			final EncodedKeySpec keySpec = keySpecConstructor.newInstance(keyBytes);
+			final KeyFactory pkFactory = KeyFactory.getInstance(type);
 			result = pkFactory.generatePrivate(keySpec);
 		}
 
@@ -105,7 +110,7 @@ public class SecurityHelper {
 	public static byte[] readBytesFromFilePath(final Resource resource) throws IOException {
 		byte[] keyBytes = null;
 
-		InputStream keyStream = resource.getInputStream();
+		final InputStream keyStream = resource.getInputStream();
 		keyBytes = IOUtils.toByteArray(keyStream);
 
 		return keyBytes;

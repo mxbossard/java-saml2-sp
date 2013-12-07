@@ -27,7 +27,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensaml.DefaultBootstrap;
+import org.opensaml.common.SignableSAMLObject;
 import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.signature.Signature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -72,6 +74,7 @@ public class OpenSaml20IntegrationTest {
 
 	@Test
 	public void testBuildSaml20AuthnRequest() throws Exception {
+		// TODO implement this test
 		// Loop on all bindings available
 		for (final SamlBindingEnum binding : SamlBindingEnum.values()) {
 			final Map<String, String[]> parametersMap = new HashMap<String, String[]>();
@@ -84,6 +87,7 @@ public class OpenSaml20IntegrationTest {
 
 	@Test
 	public void testBuildSaml20SingleLogoutRequest() throws Exception {
+		// TODO implement this test
 		// Loop on all bindings available
 		for (final SamlBindingEnum binding : SamlBindingEnum.values()) {
 			final String sessionIndex = "sessionIndex_789654_sessionIndex_123654";
@@ -96,6 +100,7 @@ public class OpenSaml20IntegrationTest {
 
 	@Test
 	public void testBuildSaml20SingleLogoutResponse() throws Exception {
+		// TODO implement this test
 		// Loop on all bindings available
 		for (final SamlBindingEnum binding : SamlBindingEnum.values()) {
 			final String originRequestId = "originRequestId_258741_originRequestId_963258";
@@ -110,6 +115,7 @@ public class OpenSaml20IntegrationTest {
 
 	@Test
 	public void testProcessSaml20IncomingRequestWithAuthnResponse() throws Exception {
+		// TODO implement this test
 		final MockHttpServletRequest request = new MockHttpServletRequest();
 
 		final IIncomingSaml incomingSaml = this.spProcessor.processSaml20IncomingRequest(request);
@@ -119,6 +125,7 @@ public class OpenSaml20IntegrationTest {
 
 	@Test
 	public void testProcessSaml20IncomingRequestWithSloRequest() throws Exception {
+		// TODO implement this test
 		final MockHttpServletRequest request = new MockHttpServletRequest();
 
 		final IIncomingSaml incomingSaml = this.spProcessor.processSaml20IncomingRequest(request);
@@ -128,10 +135,27 @@ public class OpenSaml20IntegrationTest {
 
 	@Test
 	public void testProcessSaml20IncomingRequestWithSloResponse() throws Exception {
+		// TODO implement this test
 		final MockHttpServletRequest request = new MockHttpServletRequest();
 
 		final IIncomingSaml incomingSaml = this.spProcessor.processSaml20IncomingRequest(request);
 
 		Assert.assertNotNull("SloResponse's IIncomingSaml cannot be null !", incomingSaml);
+	}
+
+	@Test
+	public void testSignSamlObject() throws Exception {
+		// TODO implement this test
+		final SignableSAMLObject signable = null;
+		final Signature signature = this.spProcessor.signSamlObject(signable);
+
+		Assert.assertNotNull("Signature cannot be null !", signature);
+	}
+
+	@Test
+	public void testLogout() throws Exception {
+		// TODO implement this test
+		final String sessionIndex = "index_de_folie";
+		this.spProcessor.logout(sessionIndex);
 	}
 }

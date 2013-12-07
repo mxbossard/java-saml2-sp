@@ -19,18 +19,20 @@
 
 package fr.mby.saml2.sp.opensaml.core;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensaml.DefaultBootstrap;
-import org.opensaml.saml2.core.Response;
+import org.opensaml.common.SAMLObject;
 import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.signature.Signature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fr.mby.saml2.sp.impl.helper.SamlTestResourcesHelper;
+import fr.mby.saml2.sp.api.om.IIncomingSaml;
 
 /**
  * Unit Test for opensaml2 implementation of ISaml20SpProcessor.
@@ -61,10 +63,28 @@ public class OpenSaml20SpProcessorTest {
 
 	@Test
 	public void testSignSamlObject() throws Exception {
-		final Response response = (Response) SamlTestResourcesHelper
-				.buildOpenSamlXmlObjectFromResource(this.responseSimpleSigned);
+		final Signature signature1 = this.spProcessor.buildSignature(false);
+		Assert.assertNotNull("Signature cannot be null !", signature1);
+		Assert.assertNotNull("Signature KeyInfo cannot be null !", signature1.getKeyInfo());
 
-		this.spProcessor.signSamlObject(response);
+		final Signature signature2 = this.spProcessor.buildSignature(true);
+		Assert.assertNotNull("Signature cannot be null !", signature2);
+		Assert.assertNull("Signature KeyInfo should be null !", signature1.getKeyInfo());
+	}
+
+	@Test
+	public void testFindSaml20IdpConnectorToUse() throws Exception {
+		// TODO implement this test
+		final SAMLObject samlObject = null;
+		this.spProcessor.findSaml20IdpConnectorToUse(samlObject);
+
+	}
+
+	@Test
+	public void testTryAuthenticationPropagation() throws Exception {
+		// TODO implement this test
+		final IIncomingSaml incomingSaml = null;
+		this.spProcessor.tryAuthenticationPropagation(incomingSaml);
 
 	}
 
