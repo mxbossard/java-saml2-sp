@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package fr.mby.saml2.sp.impl.query;
 
 import fr.mby.saml2.sp.api.query.IQuery;
@@ -24,7 +25,7 @@ import fr.mby.saml2.sp.api.query.IQuery;
  * Base ISamlQuery implementation.
  * 
  * @author GIP RECIA 2013 - Maxime BOSSARD.
- *
+ * 
  */
 public abstract class SamlQuery implements IQuery {
 
@@ -32,6 +33,11 @@ public abstract class SamlQuery implements IQuery {
 	private static final long serialVersionUID = 8644852271120115445L;
 
 	private String id;
+
+	/** Default constructor for serialization. */
+	public SamlQuery() {
+		super();
+	}
 
 	@Override
 	public String getId() {

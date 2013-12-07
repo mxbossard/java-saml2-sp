@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package fr.mby.saml2.sp.impl.query;
 
 import java.io.Externalizable;
@@ -36,7 +37,7 @@ import fr.mby.saml2.sp.impl.helper.SamlHelper;
  * SAML Authn Request.
  * 
  * @author GIP RECIA 2012 - Maxime BOSSARD.
- *
+ * 
  */
 public class QueryAuthnRequest extends SamlQuery implements IRequestWaitingForResponse, Externalizable {
 
@@ -48,9 +49,14 @@ public class QueryAuthnRequest extends SamlQuery implements IRequestWaitingForRe
 
 	/** IdPConnector Id wich we can serialize. */
 	private String idpConnectorId;
-	
+
 	/** IdpConnector which build this request. */
 	private transient ISaml20IdpConnector idpConnectorBuilder;
+
+	/** Default constructor for serialization. */
+	public QueryAuthnRequest() {
+		super();
+	}
 
 	public QueryAuthnRequest(final String id, final ISaml20IdpConnector idpConnectorBuilder,
 			final Map<String, String[]> parametersMap) {
@@ -74,18 +80,18 @@ public class QueryAuthnRequest extends SamlQuery implements IRequestWaitingForRe
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void readExternal(ObjectInput input) throws IOException, ClassNotFoundException {
+	public void readExternal(final ObjectInput input) throws IOException, ClassNotFoundException {
 		this.parametersMap = (Map<String, String[]>) input.readObject();
 		this.idpConnectorId = (String) input.readObject();
 		this.loadIdpConnector(this.idpConnectorId);
 	}
 
 	@Override
-	public void writeExternal(ObjectOutput output) throws IOException {
+	public void writeExternal(final ObjectOutput output) throws IOException {
 		output.writeObject(this.parametersMap);
 		output.writeObject(this.idpConnectorId);
 	}
-	
+
 	protected void loadIdpConnector(final String idpConnectorId) {
 		final IIdpConfig idpConfig = SamlHelper.getWayfConfig().findIdpConfigById(idpConnectorId);
 		if (idpConfig != null) {

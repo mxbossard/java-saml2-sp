@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2012 RECIA http://www.recia.fr
+    @Author (C) 2012 Maxime Bossard <mxbossard@gmail.com>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:mockito="http://www.mockito.org/spring/mockito"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
+    <description>
+    </description>
+	
+	<import resource="classpath:openSaml2QueryProcessorFactoryContext.xml"/>
+	
+	<!-- Service Provider config -->
+	<bean id="spConfig" class="fr.mby.saml2.sp.impl.config.BasicSpConfig">
+		<property name="id" value="testSpConfig" />
+		<property name="entityId" value="http://www.recia.fr/cas/Shibboleth.sso" />
+		<property name="spMetadata" ref="spMetadata" />
+		<property name="description" value="Service Provider inside CAS." />
+
+		<property name="decryptionKeyResource" ref="spKey" />
+		<property name="decryptionKeySpec" value="java.security.spec.PKCS8EncodedKeySpec" />
+		<property name="decryptionKeyType" value="RSA" />
+
+		<property name="signingKeyResource" ref="spKey" />
+		<property name="signingKeySpec" value="java.security.spec.PKCS8EncodedKeySpec" />
+		<property name="signingKeyType" value="RSA" />
+	</bean>
+	
+	<bean id="spProcessor"
+		class="fr.mby.saml2.sp.opensaml.core.OpenSaml20SpProcessor">
+		<property name="spConfig" ref="spConfig" />
+
+		<property name="idpConnectors">
+			<list>
+				<ref bean="idpConnector" />
+			</list>
+		</property>
+		
+		<property name="queryProcessorFactory" ref="queryProcessorFactory" />
+		
+		<property name="singleLogoutHandler">
+			<bean class="fr.mby.saml2.sp.impl.handler.NullSingleLogoutHandler" />
+		</property>
+		
+		<!-- Mocks -->
+		<property name="samlStorage" ref="samlStorage" />
+		
+	</bean>
+	
+	<bean id="idpConfig" class="fr.mby.saml2.sp.impl.config.BasicIdpConfig">
+		<property name="id" value="testIdpConfig" />
+		<property name="description" value="idp.test" />
+		<property name="pictureUrl" value="pictureUrl" />
+
+		<property name="forceAuthentication" value="true" />
+		<property name="requestBinding" value="SAML_20_HTTP_REDIRECT" />
+		<property name="responseBinding" value="SAML_20_HTTP_POST" />
+		<property name="attributeConsumingServiceIndex" value="1" />
+
+		<property name="idpEntityId" value="http://www.recia.fr/idp" />
+		<property name="idpMetadata" ref="idpMetadata" />
+	</bean>
+
+	<bean id="idpConnector"
+		class="fr.mby.saml2.sp.opensaml.core.OpenSaml20IdpConnector">
+		<property name="idpConfig" ref="idpConfig" />
+	</bean>
+
+	<!-- Mocked beans -->
+	<mockito:mock id="samlStorage" class="fr.mby.saml2.sp.api.core.ISaml20Storage" />
+	
+</beans>

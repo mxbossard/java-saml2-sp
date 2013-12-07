@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package fr.mby.saml2.sp.impl.query;
 
 import fr.mby.saml2.sp.api.om.IResponse;
@@ -24,7 +25,7 @@ import fr.mby.saml2.sp.api.om.IResponse;
  * SAML SLO Response to a SAML SLO Request.
  * 
  * @author GIP RECIA 2012 - Maxime BOSSARD.
- *
+ * 
  */
 public class QuerySloResponse extends SamlQuery implements IResponse {
 
@@ -34,6 +35,11 @@ public class QuerySloResponse extends SamlQuery implements IResponse {
 	private String inResponseToId;
 
 	private QuerySloRequest originalRequest;
+
+	/** Default constructor for serialization. */
+	public QuerySloResponse() {
+		super();
+	}
 
 	public QuerySloResponse(final String id) {
 		super(id);

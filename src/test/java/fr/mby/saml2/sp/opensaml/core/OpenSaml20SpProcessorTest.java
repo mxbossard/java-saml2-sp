@@ -19,32 +19,28 @@
 
 package fr.mby.saml2.sp.opensaml.core;
 
-import java.io.IOException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.signature.Signature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fr.mby.saml2.sp.impl.helper.SamlTestResourcesHelper;
-import fr.mby.saml2.sp.opensaml.helper.OpenSamlHelper;
 
 /**
- * Tests d'intégration de la library opensaml2 dans le SP Processor.
+ * Unit Test for opensaml2 implementation of ISaml20SpProcessor.
  * 
- * @author GIP RECIA 2012 - Maxime BOSSARD.
+ * @author Maxime Bossard - 2013
  * 
  */
 @RunWith(value = SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:idpSideConfigContext.xml")
-public class OpenSaml20ProcessingTest {
+public class OpenSaml20SpProcessorTest {
 
 	@javax.annotation.Resource(name = "responseAssertSigned")
 	private ClassPathResource responseAssertSigned;
@@ -64,27 +60,12 @@ public class OpenSaml20ProcessingTest {
 	}
 
 	@Test
-	public void signMessage() throws Exception {
+	public void testSignSamlObject() throws Exception {
 		final Response response = (Response) SamlTestResourcesHelper
 				.buildOpenSamlXmlObjectFromResource(this.responseSimpleSigned);
 
-		this.signResponse(response);
-	}
+		this.spProcessor.signSamlObject(response);
 
-	/**
-	 * Temp method to sign a message.
-	 * 
-	 * @param samlResponse
-	 * @throws IOException
-	 */
-	private void signResponse(final Response samlResponse) throws IOException {
-		// final Assertion assertion = samlResponse.getAssertions().iterator().next();
-		// Signature signature1 = this.spProcessor.buildSignature(false);
-		final Signature signature2 = this.spProcessor.buildSignature(false);
-		// assertion.setSignature(signature1);
-		samlResponse.setSignature(signature2);
-		// OpenSamlHelper.httpPostEncode(assertion);
-		OpenSamlHelper.httpPostEncode(samlResponse);
 	}
 
 }
