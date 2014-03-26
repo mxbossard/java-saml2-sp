@@ -28,10 +28,12 @@ import net.sf.ehcache.Element;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.ehcache.EhCacheFactoryBean;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import fr.mby.saml2.sp.api.core.ISaml20Storage;
 import fr.mby.saml2.sp.api.om.IAuthentication;
+import fr.mby.saml2.sp.api.om.IRequestWaitingForResponse;
 
 /**
  * Facade for CAS SAML 2.0 usage
@@ -51,8 +53,11 @@ public class EhcacheSaml20Storage implements ISaml20Storage, InitializingBean {
 	/** SAML 2.0 Authentication Name ID cache name. */
 	private static final String SAML2_NAME_ID_CACHE_NAME = "saml2NameIdCache";
 
+	/** SAML 2.0 Request waiting for response cache name. */
+	private static final String SAML2_RWFR_CACHE_NAME = "samlRequestWaitingForResponseCache";
+
 	/** SAML 2.0 Authentication credentials cache. */
-	private Ehcache saml2AuthenticatedCredentialsCache;
+	private Ehcache samlAuthenticationsCache;
 
 	/** SAML 2.0 Authentication Name ID cache. */
 	private Ehcache saml2NameIdCache;
@@ -60,17 +65,20 @@ public class EhcacheSaml20Storage implements ISaml20Storage, InitializingBean {
 	/** SAML 2.0 Authentication Base ID cache. */
 	private Ehcache saml2BaseIdCache;
 
+	/** Cache for Request which wait for a response to be received. */
+	private Ehcache samlRequestWaitingForResponseCache;
+	
 	@Override
-	public void storeAuthenticationInCache(final String tgtId, final IAuthentication auth) {
+	public void storeAuthentication(final String tgtId, final IAuthentication auth) {
 		if (StringUtils.hasText(tgtId) && (auth != null)) {
-			if (this.saml2AuthenticatedCredentialsCache.isKeyInCache(tgtId)) {
+			if (this.samlAuthenticationsCache.isKeyInCache(tgtId)) {
 				// TGT already used !
 				throw new IllegalStateException(
 						String.format(
 								"Unable to store SAML 2.0 authenticated credentials in cache beacause TGT [%s] is already present !",
 								tgtId));
 			}
-			this.saml2AuthenticatedCredentialsCache.put(new Element(tgtId, auth));
+			this.samlAuthenticationsCache.put(new Element(tgtId, auth));
 
 			final String idpSubject = auth.getSubjectId();
 			if (StringUtils.hasText(idpSubject)) {
@@ -80,11 +88,11 @@ public class EhcacheSaml20Storage implements ISaml20Storage, InitializingBean {
 	}
 
 	@Override
-	public IAuthentication retrieveAuthenticationFromCache(final String tgtId) {
+	public IAuthentication findAuthentication(final String tgtId) {
 		IAuthentication auth = null;
 
 		if (StringUtils.hasText(tgtId)) {
-			final Element element = this.saml2AuthenticatedCredentialsCache.get(tgtId);
+			final Element element = this.samlAuthenticationsCache.get(tgtId);
 			if (element != null) {
 				final Object value = element.getValue();
 				if (value != null) {
@@ -97,11 +105,11 @@ public class EhcacheSaml20Storage implements ISaml20Storage, InitializingBean {
 	}
 
 	@Override
-	public IAuthentication removeAuthenticationFromCache(final String tgtId) {
-		final IAuthentication auth = this.retrieveAuthenticationFromCache(tgtId);
+	public IAuthentication removeAuthentication(final String tgtId) {
+		final IAuthentication auth = this.findAuthentication(tgtId);
 
 		if (StringUtils.hasText(tgtId)) {
-			this.saml2AuthenticatedCredentialsCache.remove(tgtId);
+			this.samlAuthenticationsCache.remove(tgtId);
 		}
 
 		if (auth != null) {
@@ -114,21 +122,84 @@ public class EhcacheSaml20Storage implements ISaml20Storage, InitializingBean {
 		return auth;
 	}
 
+	@Override
+	public String findSessionIndexBySamlNameId(final String nameId) {
+		String tgtId = null;
+
+		if (StringUtils.hasText(nameId)) {
+			final Element element = this.saml2NameIdCache.get(nameId);
+			if (element != null) {
+				tgtId = (String) element.getValue();
+			}
+		}
+
+		return tgtId;
+	}
+
+	@Override
+	public void storeRequestWaitingForResponse(final IRequestWaitingForResponse request) {
+		Assert.notNull(request, "Trying to store a null request in cache !");
+		Assert.hasText(request.getId(), "Trying to store a request without Id in cache !");
+		this.samlRequestWaitingForResponseCache.put(new Element(request.getId(), request));
+		
+	}
+
+	@Override
+	public IRequestWaitingForResponse findRequestWaitingForResponse(final String requestId) {
+		IRequestWaitingForResponse result = null;
+
+		Assert.hasText(requestId, "No requestId supplied !");
+		final Element element = this.samlRequestWaitingForResponseCache.get(requestId);
+		if (element != null) {
+			result = (IRequestWaitingForResponse) element.getValue();
+		}
+
+		return result;
+	}
+
+	@Override
+	public IRequestWaitingForResponse removeRequestWaitingForResponse(final String requestId) {
+		Assert.hasText(requestId, "No requestId supplied !");
+		final IRequestWaitingForResponse result = this.findRequestWaitingForResponse(requestId);
+		
+		if (result != null) {
+			this.samlRequestWaitingForResponseCache.remove(requestId);
+		}
+
+		return result;
+	}
+
+	@Override
+	public void clear() {
+		this.samlRequestWaitingForResponseCache.removeAll();
+		this.samlAuthenticationsCache.removeAll();
+		this.saml2BaseIdCache.removeAll();
+		this.saml2NameIdCache.removeAll();
+	}
+
 	/**
 	 * Initialize caches if needed.
 	 * 
 	 * @throws IOException
 	 * @throws CacheException
 	 */
-	protected void initCache() throws CacheException, IOException {
-		if (this.saml2AuthenticatedCredentialsCache == null) {
+	protected void initCaches() throws CacheException, IOException {
+		if (this.samlAuthenticationsCache == null) {
 			final EhCacheFactoryBean cacheFactory = new EhCacheFactoryBean();
 			cacheFactory.setCacheName(EhcacheSaml20Storage.SAML2_AUTH_CREDS_CACHE_NAME);
 			cacheFactory.afterPropertiesSet();
-			this.saml2AuthenticatedCredentialsCache = cacheFactory.getObject();
+			this.samlAuthenticationsCache = cacheFactory.getObject();
 		}
-		this.saml2AuthenticatedCredentialsCache.bootstrap();
+		this.samlAuthenticationsCache.bootstrap();
 
+		if (this.samlRequestWaitingForResponseCache == null) {
+			final EhCacheFactoryBean cacheFactory = new EhCacheFactoryBean();
+			cacheFactory.setCacheName(EhcacheSaml20Storage.SAML2_RWFR_CACHE_NAME);
+			cacheFactory.afterPropertiesSet();
+			this.samlRequestWaitingForResponseCache = cacheFactory.getObject();
+		}
+		this.samlRequestWaitingForResponseCache.bootstrap();
+		
 		if (this.saml2BaseIdCache == null) {
 			final EhCacheFactoryBean cacheFactory = new EhCacheFactoryBean();
 			cacheFactory.setCacheName(EhcacheSaml20Storage.SAML2_BASE_ID_CACHE_NAME);
@@ -147,30 +218,25 @@ public class EhcacheSaml20Storage implements ISaml20Storage, InitializingBean {
 	}
 
 	@Override
-	public String findSessionIndexBySamlNameId(final String nameId) {
-		String tgtId = null;
-
-		if (StringUtils.hasText(nameId)) {
-			final Element element = this.saml2NameIdCache.get(nameId);
-			if (element != null) {
-				tgtId = (String) element.getValue();
-			}
-		}
-
-		return tgtId;
-	}
-
-	@Override
 	public void afterPropertiesSet() throws Exception {
-		this.initCache();
+		this.initCaches();
 	}
 
-	public Ehcache getSaml2AuthenticatedCredentialsCache() {
-		return this.saml2AuthenticatedCredentialsCache;
+	public Ehcache getSamlAuthenticationsCache() {
+		return samlAuthenticationsCache;
 	}
 
-	public void setSaml2AuthenticatedCredentialsCache(final Ehcache saml2AuthenticatedCredentialsCache) {
-		this.saml2AuthenticatedCredentialsCache = saml2AuthenticatedCredentialsCache;
+	public void setSamlAuthenticationsCache(Ehcache samlAuthenticationsCache) {
+		this.samlAuthenticationsCache = samlAuthenticationsCache;
+	}
+
+	public Ehcache getSamlRequestWaitingForResponseCache() {
+		return samlRequestWaitingForResponseCache;
+	}
+
+	public void setSamlRequestWaitingForResponseCache(
+			Ehcache samlRequestWaitingForResponseCache) {
+		this.samlRequestWaitingForResponseCache = samlRequestWaitingForResponseCache;
 	}
 
 	public Ehcache getSaml2NameIdCache() {

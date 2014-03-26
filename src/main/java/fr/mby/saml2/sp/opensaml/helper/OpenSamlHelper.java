@@ -32,6 +32,10 @@ import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import fr.mby.saml2.sp.api.core.SamlBindingEnum;
+import fr.mby.saml2.sp.impl.helper.SamlHelper;
+import fr.mby.saml2.sp.opensaml.wrapper.SpringResourceWrapper;
+
 import org.opensaml.common.IdentifierGenerator;
 import org.opensaml.common.SignableSAMLObject;
 import org.opensaml.common.impl.SecureRandomIdentifierGenerator;
@@ -57,10 +61,6 @@ import org.springframework.util.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import fr.mby.saml2.sp.api.core.SamlBindingEnum;
-import fr.mby.saml2.sp.impl.helper.SamlHelper;
-import fr.mby.saml2.sp.opensaml.wrapper.SpringResourceWrapper;
-
 /**
  * @author GIP RECIA 2012 - Maxime BOSSARD.
  *
@@ -81,17 +81,26 @@ public abstract class OpenSamlHelper {
 	}
 
 	/**
-	 * Marshall an opensaml XMLObject.
+	 * Marshall an opensaml SignableSAMLObject.
 	 * 
-	 * @param xmlObject the XMLObject
+	 * @param signableSamlObject the SignableSAMLObject
 	 * @return the marshalled XML.
 	 * @throws MarshallingException
+	 * 
+	 * @throws SignatureException 
 	 */
-	public static String marshallXmlObject(final XMLObject xmlObject) throws MarshallingException {
+	public static String marshallSignableSamlObject(final SignableSAMLObject signableSamlObject)
+			throws MarshallingException, SignatureException {
 		String xmlMessage = null;
 		try {
-			Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(xmlObject);
-			Element element = marshaller.marshall(xmlObject);
+			Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(signableSamlObject);
+			Element element = marshaller.marshall(signableSamlObject);
+
+			// Sign the saml object
+			Signature signature = signableSamlObject.getSignature();
+			Assert.notNull(signature, "The request is not signed !");
+			Signer.signObject(signature);
+
 			StringWriter rspWrt = new StringWriter();
 			XMLHelper.writeNode(element, rspWrt);
 			xmlMessage = rspWrt.toString();
@@ -106,18 +115,18 @@ public abstract class OpenSamlHelper {
 		return xmlMessage;
 	}
 
-	public static String marshallSignableSamlObject(final SignableSAMLObject signableSamlObject)
-			throws MarshallingException, SignatureException {
+	/**
+	 * Marshall an opensaml XMLObject.
+	 * 
+	 * @param xmlObject the XMLObject
+	 * @return the marshalled XML.
+	 * @throws MarshallingException
+	 */
+	public static String marshallXmlObject(final XMLObject xmlObject) throws MarshallingException {
 		String xmlMessage = null;
 		try {
-			Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(signableSamlObject);
-			Element element = marshaller.marshall(signableSamlObject);
-
-			// Sign the saml object
-			Signature signature = signableSamlObject.getSignature();
-			Assert.notNull(signature, "The request is not signed !");
-			Signer.signObject(signature);
-
+			Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(xmlObject);
+			Element element = marshaller.marshall(xmlObject);
 			StringWriter rspWrt = new StringWriter();
 			XMLHelper.writeNode(element, rspWrt);
 			xmlMessage = rspWrt.toString();

@@ -204,7 +204,7 @@ public abstract class BaseSamlQueryProcessor<T extends IQuery> implements IQuery
 
 		// Try to retrieve original request
 		IRequestWaitingForResponse originalRequest =
-				this.getSpProcessor().retrieveRequestWaitingForResponse(inResponseToId);
+				this.getSpProcessor().getSaml20Storage().findRequestWaitingForResponse(inResponseToId);
 
 		// Original request cannot be null
 		if (originalRequest == null) {

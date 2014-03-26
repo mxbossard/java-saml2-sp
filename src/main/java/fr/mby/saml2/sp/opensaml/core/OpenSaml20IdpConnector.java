@@ -131,7 +131,7 @@ public class OpenSaml20IdpConnector implements ISaml20IdpConnector, Initializing
 			final QueryAuthnRequest samlQuery = this.buildQueryAuthnRequest(parametersMap);
 			final String ssoEndpointUrl = this.idpConfig.getIdpSsoEndpointUrl(binding);
 			outgoingSaml = this.buildSamlOutgoingRequest(samlQuery, authnRequest, binding, ssoEndpointUrl);
-			this.getSaml20SpProcessor().storeRequestWaitingForResponseInCache(samlQuery);
+			this.getSaml20SpProcessor().getSaml20Storage().storeRequestWaitingForResponse(samlQuery);
 
 		} catch (final MarshallingException e) {
 			throw new SamlBuildingException("Unable to build SAML 2.0 AuthnRequest !", e);
@@ -152,7 +152,7 @@ public class OpenSaml20IdpConnector implements ISaml20IdpConnector, Initializing
 		final ISaml20SpProcessor spProc = this.getSaml20SpProcessor();
 		final ISaml20Storage samlStorage = spProc.getSaml20Storage();
 
-		final IAuthentication auth = samlStorage.retrieveAuthenticationFromCache(sessionIndex);
+		final IAuthentication auth = samlStorage.findAuthentication(sessionIndex);
 		Assert.notNull(auth, "SAML authentication cannot be null here !");
 
 		final LogoutRequest logoutRequest = this.buildLogoutRequest(binding, auth);
@@ -162,7 +162,7 @@ public class OpenSaml20IdpConnector implements ISaml20IdpConnector, Initializing
 			final QuerySloRequest samlQuery = this.buildQuerySloRequest();
 			final String sloEndpointUrl = this.idpConfig.getIdpSloEndpointUrl(binding);
 			outgoingSaml = this.buildSamlOutgoingRequest(samlQuery, logoutRequest, binding, sloEndpointUrl);
-			this.getSaml20SpProcessor().storeRequestWaitingForResponseInCache(samlQuery);
+			this.getSaml20SpProcessor().getSaml20Storage().storeRequestWaitingForResponse(samlQuery);
 
 		} catch (final MarshallingException e) {
 			throw new SamlBuildingException("Unable to build SAML 2.0 SLO Request !", e);

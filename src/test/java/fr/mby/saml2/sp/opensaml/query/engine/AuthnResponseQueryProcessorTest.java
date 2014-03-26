@@ -119,14 +119,14 @@ public class AuthnResponseQueryProcessorTest {
 	 */
 	@Before
 	public void initCaches() throws Exception {
-		this.spProcessor.clearCaches();
+		this.spProcessor.getSaml20Storage().clear();
 
 		final AuthnRequest openSamlAuthnRequest = (AuthnRequest) SamlTestResourcesHelper
 				.buildOpenSamlXmlObjectFromResource(this.authnRequest);
 		final String id = openSamlAuthnRequest.getID();
 		final Map<String, String[]> parametersMap = new HashMap<String, String[]>();
 		final IRequestWaitingForResponse requestData = new QueryAuthnRequest(id, this.idpConnector, parametersMap);
-		this.spProcessor.storeRequestWaitingForResponseInCache(requestData);
+		this.spProcessor.getSaml20Storage().storeRequestWaitingForResponse(requestData);
 	}
 
 	/**
@@ -197,7 +197,7 @@ public class AuthnResponseQueryProcessorTest {
 	 */
 	@Test(expected = SamlProcessingException.class)
 	public void testNoOriginalAuthnRequestProcessing() throws Exception {
-		this.spProcessor.clearCaches();
+		this.spProcessor.getSaml20Storage().clear();
 		this.testAuthnResponseProcessingScenario1(this.responseAssertSigned);
 	}
 

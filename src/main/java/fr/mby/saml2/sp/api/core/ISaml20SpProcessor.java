@@ -29,7 +29,6 @@ import fr.mby.saml2.sp.api.config.ISpConfig;
 import fr.mby.saml2.sp.api.exception.SamlProcessingException;
 import fr.mby.saml2.sp.api.exception.UnsupportedSamlOperation;
 import fr.mby.saml2.sp.api.om.IIncomingSaml;
-import fr.mby.saml2.sp.api.om.IRequestWaitingForResponse;
 
 /**
  * SAML 2.0 IdP connector to ensure dialog with the IdP.
@@ -61,26 +60,9 @@ public interface ISaml20SpProcessor {
 	ISaml20IdpConnector findSaml20IdpConnectorToUse(String idpEntityId);
 
 	/**
-	 * Store a SAML request, which was built on this SP for a later use, in the cache.
+	 * Retrieve the SAML 2.0 Storage.
 	 * 
-	 * @param requestData
-	 *            the request to store
-	 */
-	void storeRequestWaitingForResponseInCache(IRequestWaitingForResponse samlRequest);
-
-	/**
-	 * Retrieve a SAML request waiting for a response, stored in the cache.
-	 * 
-	 * @param inResponseToId
-	 *            the id of the request
-	 * @return the request waiting for a response
-	 */
-	IRequestWaitingForResponse retrieveRequestWaitingForResponse(String inResponseToId);
-
-	/**
-	 * Retrieve the SAML 2.0 Facade.
-	 * 
-	 * @return the SAML 2.0 facade
+	 * @return the SAML 2.0 storage
 	 */
 	ISaml20Storage getSaml20Storage();
 

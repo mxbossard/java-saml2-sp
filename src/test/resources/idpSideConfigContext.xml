@@ -63,12 +63,12 @@
 		</property>
 		
 		<!-- Mocks -->
-		<property name="samlStorage" ref="samlStorage" />
+		<property name="saml20Storage" ref="saml20Storage" />
 
 	</bean>
 		
 	<!-- Mocked beans -->
-	<mockito:mock id="samlStorage" class="fr.mby.saml2.sp.api.core.ISaml20Storage" />
+	<mockito:mock id="saml20Storage" class="fr.mby.saml2.sp.api.core.ISaml20Storage" />
 	<mockito:mock id="idpConnector" class="fr.mby.saml2.sp.opensaml.core.OpenSaml20IdpConnector" />
 	<mockito:mock id="queryProcessorFactory" class="fr.mby.saml2.sp.opensaml.query.engine.OpenSaml2QueryProcessorFactory" />
 

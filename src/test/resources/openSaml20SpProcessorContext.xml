@@ -63,7 +63,7 @@
 		</property>
 		
 		<!-- Mocks -->
-		<property name="samlStorage" ref="samlStorage" />
+		<property name="saml20Storage" ref="saml20Storage" />
 		
 	</bean>
 	
@@ -87,6 +87,6 @@
 	</bean>
 
 	<!-- Mocked beans -->
-	<mockito:mock id="samlStorage" class="fr.mby.saml2.sp.api.core.ISaml20Storage" />
+	<mockito:mock id="saml20Storage" class="fr.mby.saml2.sp.api.core.ISaml20Storage" />
 	
 </beans>

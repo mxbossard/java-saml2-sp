@@ -19,17 +19,12 @@
 
 package fr.mby.saml2.sp.opensaml.core;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-
-import net.sf.ehcache.CacheException;
-import net.sf.ehcache.Ehcache;
-import net.sf.ehcache.Element;
 
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SignableSAMLObject;
@@ -49,10 +44,8 @@ import org.opensaml.xml.signature.impl.SignatureBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.cache.ehcache.EhCacheFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import fr.mby.saml2.sp.api.config.IIdpConfig;
@@ -86,12 +79,6 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 	/** Logger. */
 	private final Logger logger = LoggerFactory.getLogger(OpenSaml20SpProcessor.class);
 
-	/** SAML 2.0 Request waiting for response cache name. */
-	private static final String SAML2_RWFR_CACHE_NAME = "samlRequestWaitingForResponseCache";
-
-	/** SAML 2.0 Authentications cache name. */
-	private static final String SAML2_AUTHN_CACHE_NAME = "samlAuthenticationCache";
-
 	/** SP Configuration. */
 	private ISpConfig spConfig;
 
@@ -104,20 +91,14 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 	/** SP Signing credentials (spSigningKey + spSigningCertificate). */
 	private Credential spSigningCredential;
 
-	/** Cache for Request which wait for a response to be received. */
-	private Ehcache samlRequestWaitingForResponseCache;
-
-	/** Cache for SAML authentications already processed. */
-	private Ehcache samlAuthenticationsCache;
-
 	/** IdP connectors. */
 	private Collection<ISaml20IdpConnector> idpConnectors;
 
 	/** Map of IdP connectors indexed by their entity Id. */
 	private final Map<String, ISaml20IdpConnector> idpConnectorsByEntityId = new HashMap<String, ISaml20IdpConnector>();
 
-	/** SAML 2.0 Facade. */
-	private ISaml20Storage samlStorage;
+	/** SAML 2.0 Storage. */
+	private ISaml20Storage saml20Storage;
 
 	/** Authentication handler. */
 	private IAuthenticationHandler authenticationHandler;
@@ -150,28 +131,8 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 	}
 
 	@Override
-	public IRequestWaitingForResponse retrieveRequestWaitingForResponse(final String inResponseToId) {
-		IRequestWaitingForResponse result = null;
-
-		Assert.hasText(inResponseToId, "No inResponseToId provided !");
-		final Element element = this.samlRequestWaitingForResponseCache.get(inResponseToId);
-		if (element != null) {
-			result = (IRequestWaitingForResponse) element.getValue();
-		}
-
-		return result;
-	}
-
-	@Override
-	public void storeRequestWaitingForResponseInCache(final IRequestWaitingForResponse requestData) {
-		Assert.notNull(requestData, "Trying to store a null request in cache !");
-		Assert.hasText(requestData.getId(), "Trying to store a request without Id in cache !");
-		this.samlRequestWaitingForResponseCache.put(new Element(requestData.getId(), requestData));
-	}
-
-	@Override
 	public ISaml20Storage getSaml20Storage() {
-		return this.samlStorage;
+		return this.saml20Storage;
 	}
 
 	@Override
@@ -201,7 +162,7 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.samlStorage, "The SAML 2.0 Storage wasn't injected !");
+		Assert.notNull(this.saml20Storage, "The SAML 2.0 Storage wasn't injected !");
 		Assert.notNull(this.getSpConfig(), "No SP configuration provided for this SP processor !");
 		Assert.notNull(this.queryProcessorFactory, "No QueryProcessorFactory injected !");
 
@@ -231,8 +192,6 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 
 		this.decrypter = this.buildDecrypter();
 
-		this.initCaches();
-
 		// Register this processor in the Helper
 		SamlHelper.registerSpProcessor(this);
 
@@ -259,13 +218,7 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 
 		if (StringUtils.hasText(inResponseToId)) {
 			// Get request from cache
-			final Element element = this.samlRequestWaitingForResponseCache.get(inResponseToId);
-			if (element != null) {
-				request = (IRequestWaitingForResponse) element.getObjectValue();
-
-				// Clear request from cache
-				this.samlRequestWaitingForResponseCache.remove(inResponseToId);
-			}
+			request = this.saml20Storage.removeRequestWaitingForResponse(inResponseToId);
 		}
 
 		if (request == null) {
@@ -273,54 +226,6 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 		}
 
 		return request;
-	}
-
-	/** Clear caches. Use it for test purpose only ! */
-	public void clearCaches() {
-		this.samlRequestWaitingForResponseCache.removeAll();
-		this.samlAuthenticationsCache.removeAll();
-	}
-
-	/**
-	 * Store a SAML Authentication in the cache by the IdP session index.
-	 * 
-	 * @param authns
-	 *            the collection of authentications
-	 * @throws SamlSecurityException
-	 */
-	protected void storeSamlAuthenticationsInCache(final List<IAuthentication> authns) throws SamlSecurityException {
-		if (!CollectionUtils.isEmpty(authns)) {
-			for (final IAuthentication auth : authns) {
-				final String authKey = auth.getSessionIndex();
-				// Check auth already done
-				final Element alreadyAuthenticated = this.samlAuthenticationsCache.get(authKey);
-				if (alreadyAuthenticated != null) {
-					throw new SamlSecurityException("Attempt to replay a previous authentication !");
-				}
-
-				final Element element = new Element(authKey, auth);
-				this.samlAuthenticationsCache.put(element);
-			}
-		}
-	}
-
-	/**
-	 * Find a chached Saml Authentication.
-	 * 
-	 * @param sessionId
-	 * @return
-	 */
-	protected IAuthentication getCachedSamlAuthentications(final String sessionIndex) {
-		IAuthentication result = null;
-
-		if (StringUtils.hasText(sessionIndex)) {
-			final Element element = this.samlAuthenticationsCache.get(sessionIndex);
-			if (element != null) {
-				result = (IAuthentication) element.getObjectValue();
-			}
-		}
-
-		return result;
 	}
 
 	/**
@@ -344,14 +249,9 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 			final String originalRequestId = samlResponse.getInResponseTo();
 
 			if (StringUtils.hasText(originalRequestId)) {
-				final Element element = this.samlRequestWaitingForResponseCache.get(originalRequestId);
-				if (element != null) {
-					final Object value = element.getValue();
-					if (value != null) {
-						final IRequestWaitingForResponse originalRequestData = (IRequestWaitingForResponse) element
-								.getValue();
-						samlConnector = originalRequestData.getIdpConnectorBuilder();
-					}
+				final IRequestWaitingForResponse originalRequestData = this.saml20Storage.findRequestWaitingForResponse(originalRequestId);
+				if (originalRequestData != null) {
+					samlConnector = originalRequestData.getIdpConnectorBuilder();
 				}
 			}
 
@@ -375,33 +275,7 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 		return samlConnector;
 	}
 
-	/**
-	 * Initialize caches if needed.
-	 * 
-	 * @throws IOException
-	 * @throws CacheException
-	 */
-	protected void initCaches() throws CacheException, IOException {
-		if (this.samlRequestWaitingForResponseCache == null) {
-			final EhCacheFactoryBean requestCacheFactory = new EhCacheFactoryBean();
-			final String requestCacheName = OpenSaml20SpProcessor.SAML2_RWFR_CACHE_NAME;
-			requestCacheFactory.setCacheName(requestCacheName);
-			requestCacheFactory.afterPropertiesSet();
-			this.samlRequestWaitingForResponseCache = requestCacheFactory.getObject();
-		}
-
-		if (this.samlAuthenticationsCache == null) {
-			final EhCacheFactoryBean responseCacheFactory = new EhCacheFactoryBean();
-			final String responseCacheName = OpenSaml20SpProcessor.SAML2_AUTHN_CACHE_NAME;
-			responseCacheFactory.setCacheName(responseCacheName);
-			responseCacheFactory.afterPropertiesSet();
-			this.samlAuthenticationsCache = responseCacheFactory.getObject();
-		}
-
-		this.samlRequestWaitingForResponseCache.bootstrap();
-		this.samlAuthenticationsCache.bootstrap();
-	}
-
+	
 	public void setSpConfig(final ISpConfig spConfig) {
 		this.spConfig = spConfig;
 	}
@@ -470,22 +344,6 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 		}
 	}
 
-	public Ehcache getSamlRequestDataCache() {
-		return this.samlRequestWaitingForResponseCache;
-	}
-
-	public void setSamlRequestDataCache(final Ehcache samlRequestDataCache) {
-		this.samlRequestWaitingForResponseCache = samlRequestDataCache;
-	}
-
-	public Ehcache getSamlResponseDataCache() {
-		return this.samlAuthenticationsCache;
-	}
-
-	public void setSamlResponseDataCache(final Ehcache samlResponseDataCache) {
-		this.samlAuthenticationsCache = samlResponseDataCache;
-	}
-
 	public Collection<ISaml20IdpConnector> getIdpConnectors() {
 		return this.idpConnectors;
 	}
@@ -495,22 +353,13 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 	}
 
 	/**
-	 * Getter of samlStorage.
-	 * 
-	 * @return the samlStorage
-	 */
-	public ISaml20Storage getSamlStorage() {
-		return this.samlStorage;
-	}
-
-	/**
 	 * Setter of samlStorage.
 	 * 
 	 * @param samlStorage
 	 *            the samlStorage to set
 	 */
-	public void setSamlStorage(final ISaml20Storage samlStorage) {
-		this.samlStorage = samlStorage;
+	public void setSaml20Storage(final ISaml20Storage samlStorage) {
+		this.saml20Storage = samlStorage;
 	}
 
 	/**

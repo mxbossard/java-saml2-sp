@@ -25,6 +25,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
+import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.LogoutRequest;
+import org.opensaml.saml2.core.LogoutResponse;
+import org.opensaml.saml2.core.impl.IssuerBuilder;
+import org.opensaml.saml2.core.impl.LogoutRequestBuilder;
+import org.opensaml.saml2.core.impl.LogoutResponseBuilder;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.signature.Signature;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +39,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fr.mby.saml2.sp.api.om.IIncomingSaml;
+import fr.mby.saml2.sp.api.om.IRequestWaitingForResponse;
 
 /**
  * Unit Test for opensaml2 implementation of ISaml20SpProcessor.
@@ -43,6 +50,14 @@ import fr.mby.saml2.sp.api.om.IIncomingSaml;
 @RunWith(value = SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:idpSideConfigContext.xml")
 public class OpenSaml20SpProcessorTest {
+
+	private static final String REQUEST_ISSUER = "http://www.recia.fr/service";
+
+	private static final String REQUEST_ID = "SOME_REQUEST_ID_12487";
+
+	private static final String RESPONSE_ISSUER = "http://www.recia.fr/idp";
+
+	private static final String RESPONSE_ID = "SOME_RESPONSE_ID_56093";
 
 	@javax.annotation.Resource(name = "responseAssertSigned")
 	private ClassPathResource responseAssertSigned;
@@ -56,6 +71,12 @@ public class OpenSaml20SpProcessorTest {
 	@Autowired
 	private OpenSaml20SpProcessor spProcessor;
 
+	private final LogoutRequestBuilder logoutRequestBuilder = new LogoutRequestBuilder();
+	
+	private final LogoutResponseBuilder logoutResponseBuilder = new LogoutResponseBuilder();
+	
+	private final IssuerBuilder issuerBuilder = new IssuerBuilder();
+	
 	@BeforeClass
 	public static void initOpenSaml() throws ConfigurationException {
 		DefaultBootstrap.bootstrap();
@@ -69,14 +90,45 @@ public class OpenSaml20SpProcessorTest {
 
 		final Signature signature2 = this.spProcessor.buildSignature(true);
 		Assert.assertNotNull("Signature cannot be null !", signature2);
-		Assert.assertNull("Signature KeyInfo should be null !", signature1.getKeyInfo());
+		Assert.assertNull("Signature KeyInfo must be null !", signature2.getKeyInfo());
 	}
 
 	@Test
-	public void testFindSaml20IdpConnectorToUse() throws Exception {
+	public void testFindSaml20IdpConnectorToUseToProcessRequests() throws Exception {
 		// TODO implement this test
-		final SAMLObject samlObject = null;
-		this.spProcessor.findSaml20IdpConnectorToUse(samlObject);
+		LogoutRequest logoutRequest = logoutRequestBuilder.buildObject();
+		Issuer issuer = issuerBuilder.buildObject();
+		
+		// Issuer
+		issuer.setValue(REQUEST_ISSUER);
+		
+		// Request
+		logoutRequest.setIssuer(issuer);
+		logoutRequest.setID(REQUEST_ID);
+		
+		this.spProcessor.findSaml20IdpConnectorToUse(logoutRequest);
+
+	}
+	
+	@Test
+	public void testFindSaml20IdpConnectorToUseToProcessResponses() throws Exception {
+		// TODO implement this test
+		
+		IRequestWaitingForResponse logoutRequest = null;
+		
+		this.spProcessor.getSaml20Storage().storeRequestWaitingForResponse(logoutRequest);
+		
+		LogoutResponse logoutResponse = logoutResponseBuilder.buildObject();
+		Issuer issuer = issuerBuilder.buildObject();
+		
+		// Issuer
+		issuer.setValue(RESPONSE_ISSUER);
+		
+		// Request
+		logoutResponse.setIssuer(issuer);
+		logoutResponse.setID(RESPONSE_ID);
+		
+		this.spProcessor.findSaml20IdpConnectorToUse(logoutResponse);
 
 	}
 

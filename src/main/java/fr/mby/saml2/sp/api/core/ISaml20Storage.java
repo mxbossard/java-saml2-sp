@@ -20,6 +20,7 @@
 package fr.mby.saml2.sp.api.core;
 
 import fr.mby.saml2.sp.api.om.IAuthentication;
+import fr.mby.saml2.sp.api.om.IRequestWaitingForResponse;
 
 /**
  * @author GIP RECIA 2012 - Maxime BOSSARD.
@@ -35,7 +36,7 @@ public interface ISaml20Storage {
 	 * @param authentication
 	 *            the user authentication
 	 */
-	void storeAuthenticationInCache(String sessionIndex, IAuthentication authentication);
+	void storeAuthentication(String sessionIndex, IAuthentication authentication);
 
 	/**
 	 * Retrieve SAML 2.0 credentials of a session index.
@@ -44,7 +45,7 @@ public interface ISaml20Storage {
 	 *            the user's session index
 	 * @return the user authentication
 	 */
-	IAuthentication retrieveAuthenticationFromCache(String sessionIndex);
+	IAuthentication findAuthentication(String sessionIndex);
 
 	/**
 	 * Remove SAML 2.0 Credentials of a session index.
@@ -53,7 +54,7 @@ public interface ISaml20Storage {
 	 *            the user's session index
 	 * @return the user authentication
 	 */
-	IAuthentication removeAuthenticationFromCache(String sessionIndex);
+	IAuthentication removeAuthentication(String sessionIndex);
 
 	/**
 	 * Find the CAS TGT Id corresponding to the SAML 2.0 Name ID.
@@ -64,4 +65,29 @@ public interface ISaml20Storage {
 	 */
 	String findSessionIndexBySamlNameId(String nameId);
 
+	/**
+	 * Store a Request waiting for a response.
+	 * 
+	 * @param request the waiting request
+	 */
+	void storeRequestWaitingForResponse(IRequestWaitingForResponse request);
+	
+	/**
+	 * Find a Request waiting for a response previously stored.
+	 * 
+	 * @param requestId
+	 * @return
+	 */
+	IRequestWaitingForResponse findRequestWaitingForResponse(String requestId);
+	
+	/**
+	 * Remove a Request waiting for a response previously stored.
+	 * 
+	 * @param requestId
+	 * @return
+	 */
+	IRequestWaitingForResponse removeRequestWaitingForResponse(String requestId);
+	
+	/** Clear storage. Use it for test purpose only ! */
+	void clear();
 }
