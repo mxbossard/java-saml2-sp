@@ -91,21 +91,27 @@ public class OpenSaml20IdpConnectorTest {
 	}
 
 	/**
-	 * Initialize the Storage by adding the original request in the storage.
+	 * Initialize the Storage by adding the original requests in the storage.
 	 * 
 	 * @throws Exception
 	 */
 	@Before
-	public void initStorageWithAuthnRequest() throws Exception {
-		//this.samlStorage = Mockito.mock(ISaml20Storage.class);
-		
+	public void initStorageWithRequest() throws Exception {
+
 		final AuthnRequest openSamlAuthnRequest = (AuthnRequest) SamlTestResourcesHelper
 				.buildOpenSamlXmlObjectFromResource(this.authnRequest);
 		this.authnRequestId = openSamlAuthnRequest.getID();
 		
 		final Map<String, String[]> parametersMap = new HashMap<String, String[]>();
-		final IRequestWaitingForResponse requestData = new QueryAuthnRequest(this.authnRequestId, this.idpConnector, parametersMap);
-		Mockito.when(this.samlStorage.findRequestWaitingForResponse(this.authnRequestId)).thenReturn(requestData);
+		final IRequestWaitingForResponse authnRequestData = new QueryAuthnRequest(this.authnRequestId, this.idpConnector, parametersMap);
+		Mockito.when(this.samlStorage.findRequestWaitingForResponse(this.authnRequestId)).thenReturn(authnRequestData);
+		
+		final LogoutRequest openSamlLogoutRequest = (LogoutRequest) SamlTestResourcesHelper
+				.buildOpenSamlXmlObjectFromResource(this.sloRequest);
+		this.sloRequestId = openSamlLogoutRequest.getID();
+		
+		final IRequestWaitingForResponse sloRequestData = new QuerySloRequest(this.sloRequestId, this.idpConnector);
+		Mockito.when(this.samlStorage.findRequestWaitingForResponse(this.sloRequestId)).thenReturn(sloRequestData);
 	}
 
 	@Test
@@ -131,7 +137,7 @@ public class OpenSaml20IdpConnectorTest {
 
 		Assert.assertNotNull("QueryAuthnRequest's Id cannot be null !", query.getId());
 		Assert.assertNotNull("QueryAuthnRequest's IdPConnectorBuilder cannot be null !", query.getIdpConnectorBuilder());
-
+		
 		// Test Serialization
 		final byte[] serialized = SerializationUtils.serialize(query);
 		final QueryAuthnRequest deserializedQuery = (QueryAuthnRequest) SerializationUtils.deserialize(serialized);
@@ -146,31 +152,19 @@ public class OpenSaml20IdpConnectorTest {
 
 	@Test
 	public void testBuildQuerySloResponse() throws Exception {
-		//final String inResponseToId = "ID_427863_ID_427863_ID_427863_ID_427863_ID_427863";
-		final String inResponseToId = this.authnRequestId;
-		final QuerySloRequest originalRequest = null;
-
-		final QuerySloResponse query = this.idpConnector.buildQuerySloResponse(inResponseToId);
+		final QuerySloResponse query = this.idpConnector.buildQuerySloResponse(this.sloRequestId);
 
 		Assert.assertNotNull("Query cannot be null !", query);
 		Assert.assertNotNull("QuerySloResponse's Id !", query.getId());
-		Assert.assertEquals("QuerySloResponse's InResponseTo Id !", inResponseToId, query.getInResponseToId());
-
-		// TODO: mock store to retrieve an original request
-		Assert.assertEquals("QuerySloResponse's Original request cannot be null !", originalRequest,
-				query.getOriginalRequest());
+		Assert.assertEquals("QuerySloResponse's InResponseTo Id !", this.sloRequestId, query.getInResponseToId());
 
 		// Test Serialization
 		final byte[] serialized = SerializationUtils.serialize(query);
 		final QuerySloResponse deserializedQuery = (QuerySloResponse) SerializationUtils.deserialize(serialized);
 
-		// TODO Fix serialization
 		Assert.assertEquals("Serialization / Deserialization problem !", query.getId(), deserializedQuery.getId());
 		Assert.assertEquals("Serialization / Deserialization problem !", query.getInResponseToId(),
 				deserializedQuery.getInResponseToId());
-		Assert.assertNotNull("Serialization / Deserialization problem !", deserializedQuery.getOriginalRequest());
-		Assert.assertEquals("Serialization / Deserialization problem !", query.getOriginalRequest().getId(),
-				deserializedQuery.getOriginalRequest().getId());
 	}
 
 	@Test
@@ -185,7 +179,6 @@ public class OpenSaml20IdpConnectorTest {
 		final byte[] serialized = SerializationUtils.serialize(query);
 		final QuerySloRequest deserializedQuery = (QuerySloRequest) SerializationUtils.deserialize(serialized);
 
-		// TODO Fix serialization
 		Assert.assertEquals("Serialization / Deserialization problem !", query.getId(), deserializedQuery.getId());
 		Assert.assertNotNull("Serialization / Deserialization problem !", deserializedQuery.getIdpConnectorBuilder());
 		Assert.assertEquals("Serialization / Deserialization problem !", query.getIdpConnectorBuilder(),

@@ -54,7 +54,10 @@ public class QuerySloRequest extends SamlQuery implements IRequestWaitingForResp
 
 	public QuerySloRequest(final String id, final ISaml20IdpConnector idpConnectorBuilder) {
 		super(id);
+		
+		Assert.notNull(idpConnectorBuilder, "No IdpConnector builder supplied !");
 		this.idpConnectorBuilder = idpConnectorBuilder;
+		this.idpConnectorId = idpConnectorBuilder.getIdpConfig().getId();
 	}
 
 	@Override

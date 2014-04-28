@@ -55,6 +55,10 @@
 		<constructor-arg type="String" value="saml/requests/response_signed_full.xml" />
 	</bean>
 	
+	<bean id="sloRequest" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/slo_request.xml" />
+	</bean>
+	
 	<bean id="sloResponse" class="org.springframework.core.io.ClassPathResource">
 		<constructor-arg type="String" value="saml/requests/slo_response.xml" />
 	</bean>
