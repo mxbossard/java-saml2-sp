@@ -19,10 +19,7 @@
 
 package fr.mby.saml2.sp.impl.query;
 
-import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +36,7 @@ import fr.mby.saml2.sp.impl.helper.SamlHelper;
  * @author GIP RECIA 2012 - Maxime BOSSARD.
  * 
  */
-public class QueryAuthnRequest extends SamlQuery implements IRequestWaitingForResponse, Externalizable {
+public class QueryAuthnRequest extends SamlQuery implements IRequestWaitingForResponse {
 
 	/** Svuid. */
 	private static final long serialVersionUID = 2263117124596805999L;
@@ -78,18 +75,13 @@ public class QueryAuthnRequest extends SamlQuery implements IRequestWaitingForRe
 		return this.parametersMap;
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public void readExternal(final ObjectInput input) throws IOException, ClassNotFoundException {
-		this.parametersMap = (Map<String, String[]>) input.readObject();
-		this.idpConnectorId = (String) input.readObject();
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
 		this.loadIdpConnector(this.idpConnectorId);
 	}
-
-	@Override
-	public void writeExternal(final ObjectOutput output) throws IOException {
-		output.writeObject(this.parametersMap);
-		output.writeObject(this.idpConnectorId);
+	
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		out.defaultWriteObject();
 	}
 
 	protected void loadIdpConnector(final String idpConnectorId) {

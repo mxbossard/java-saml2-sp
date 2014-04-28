@@ -37,7 +37,7 @@ import fr.mby.saml2.sp.impl.helper.SamlHelper;
  * @author GIP RECIA 2012 - Maxime BOSSARD.
  * 
  */
-public class QuerySloRequest extends SamlQuery implements IRequestWaitingForResponse, Externalizable {
+public class QuerySloRequest extends SamlQuery implements IRequestWaitingForResponse {
 
 	/** Svuid. */
 	private static final long serialVersionUID = 1081464086973460157L;
@@ -62,17 +62,16 @@ public class QuerySloRequest extends SamlQuery implements IRequestWaitingForResp
 		return this.idpConnectorBuilder;
 	}
 
-	@Override
-	public void readExternal(final ObjectInput input) throws IOException, ClassNotFoundException {
-		this.idpConnectorId = (String) input.readObject();
+
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
 		this.loadIdpConnector(this.idpConnectorId);
 	}
-
-	@Override
-	public void writeExternal(final ObjectOutput output) throws IOException {
-		output.writeObject(this.idpConnectorId);
+	
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		out.defaultWriteObject();
 	}
- 
+
 	protected void loadIdpConnector(final String idpConnectorId) {
 		final IIdpConfig idpConfig = SamlHelper.getWayfConfig().findIdpConfigById(idpConnectorId);
 		Assert.notNull(idpConfig, "No compatible IdP config found !");

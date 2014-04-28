@@ -80,6 +80,11 @@ public class OpenSaml20IdpConnectorTest {
 	
 	private String authnRequestId;
 	
+	@javax.annotation.Resource(name = "sloRequest")
+	private ClassPathResource sloRequest;
+	
+	private String sloRequestId;
+	
 	@BeforeClass
 	public static void initOpenSaml() throws ConfigurationException {
 		DefaultBootstrap.bootstrap();
@@ -131,7 +136,6 @@ public class OpenSaml20IdpConnectorTest {
 		final byte[] serialized = SerializationUtils.serialize(query);
 		final QueryAuthnRequest deserializedQuery = (QueryAuthnRequest) SerializationUtils.deserialize(serialized);
 
-		// TODO Fix serialization
 		Assert.assertEquals("Serialization / Deserialization problem !", query.getId(), deserializedQuery.getId());
 		Assert.assertNotNull("Serialization / Deserialization problem !", deserializedQuery.getIdpConnectorBuilder());
 		Assert.assertEquals("Serialization / Deserialization problem !", query.getIdpConnectorBuilder(),
