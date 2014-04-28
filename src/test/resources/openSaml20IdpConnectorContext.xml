@@ -29,6 +29,16 @@
 	
 	<import resource="classpath:openSaml2QueryProcessorFactoryContext.xml"/>
 	
+	<!-- Wayf config -->
+	<bean id="wayfConfig" class="fr.mby.saml2.sp.impl.config.WayfConfig">
+		<property name="idpIdParamKey" value="idpId" />
+		<property name="config">
+			<list>
+				<ref bean="idpConfig" />
+			</list>
+		</property>
+	</bean>
+	
 	<!-- Service Provider config -->
 	<bean id="spConfig" class="fr.mby.saml2.sp.impl.config.BasicSpConfig">
 		<property name="id" value="testSpConfig" />

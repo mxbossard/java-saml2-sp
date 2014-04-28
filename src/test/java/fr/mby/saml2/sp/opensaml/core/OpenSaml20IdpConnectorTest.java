@@ -24,9 +24,11 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.Issuer;
@@ -39,7 +41,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.SerializationUtils;
 
+import fr.mby.saml2.sp.api.core.ISaml20Storage;
 import fr.mby.saml2.sp.api.core.SamlBindingEnum;
+import fr.mby.saml2.sp.api.om.IRequestWaitingForResponse;
+import fr.mby.saml2.sp.impl.helper.SamlTestResourcesHelper;
 import fr.mby.saml2.sp.impl.om.BasicSamlAuthentication;
 import fr.mby.saml2.sp.impl.query.QueryAuthnRequest;
 import fr.mby.saml2.sp.impl.query.QuerySloRequest;
@@ -67,9 +72,35 @@ public class OpenSaml20IdpConnectorTest {
 	@Autowired
 	private OpenSaml20IdpConnector idpConnector;
 
+	@Autowired
+	private ISaml20Storage samlStorage;
+	
+	@javax.annotation.Resource(name = "authnRequest")
+	private ClassPathResource authnRequest;
+	
+	private String authnRequestId;
+	
 	@BeforeClass
 	public static void initOpenSaml() throws ConfigurationException {
 		DefaultBootstrap.bootstrap();
+	}
+
+	/**
+	 * Initialize the Storage by adding the original request in the storage.
+	 * 
+	 * @throws Exception
+	 */
+	@Before
+	public void initStorageWithAuthnRequest() throws Exception {
+		//this.samlStorage = Mockito.mock(ISaml20Storage.class);
+		
+		final AuthnRequest openSamlAuthnRequest = (AuthnRequest) SamlTestResourcesHelper
+				.buildOpenSamlXmlObjectFromResource(this.authnRequest);
+		this.authnRequestId = openSamlAuthnRequest.getID();
+		
+		final Map<String, String[]> parametersMap = new HashMap<String, String[]>();
+		final IRequestWaitingForResponse requestData = new QueryAuthnRequest(this.authnRequestId, this.idpConnector, parametersMap);
+		Mockito.when(this.samlStorage.findRequestWaitingForResponse(this.authnRequestId)).thenReturn(requestData);
 	}
 
 	@Test
@@ -111,7 +142,8 @@ public class OpenSaml20IdpConnectorTest {
 
 	@Test
 	public void testBuildQuerySloResponse() throws Exception {
-		final String inResponseToId = "ID_427863_ID_427863_ID_427863_ID_427863_ID_427863";
+		//final String inResponseToId = "ID_427863_ID_427863_ID_427863_ID_427863_ID_427863";
+		final String inResponseToId = this.authnRequestId;
 		final QuerySloRequest originalRequest = null;
 
 		final QuerySloResponse query = this.idpConnector.buildQuerySloResponse(inResponseToId);

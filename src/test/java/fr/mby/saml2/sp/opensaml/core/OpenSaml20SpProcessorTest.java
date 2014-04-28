@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.saml2.core.Issuer;
@@ -38,8 +39,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import fr.mby.saml2.sp.api.core.ISaml20Storage;
 import fr.mby.saml2.sp.api.om.IIncomingSaml;
 import fr.mby.saml2.sp.api.om.IRequestWaitingForResponse;
+import fr.mby.saml2.sp.impl.query.QuerySloRequest;
 
 /**
  * Unit Test for opensaml2 implementation of ISaml20SpProcessor.
@@ -114,9 +117,11 @@ public class OpenSaml20SpProcessorTest {
 	public void testFindSaml20IdpConnectorToUseToProcessResponses() throws Exception {
 		// TODO implement this test
 		
-		IRequestWaitingForResponse logoutRequest = null;
+		IRequestWaitingForResponse logoutRequest = new QuerySloRequest();
 		
-		this.spProcessor.getSaml20Storage().storeRequestWaitingForResponse(logoutRequest);
+		ISaml20Storage samlStorage = Mockito.mock(ISaml20Storage.class);
+		Mockito.when(samlStorage.findRequestWaitingForResponse(REQUEST_ID)).thenReturn(logoutRequest);
+		this.spProcessor.setSaml20Storage(samlStorage);
 		
 		LogoutResponse logoutResponse = logoutResponseBuilder.buildObject();
 		Issuer issuer = issuerBuilder.buildObject();
@@ -127,6 +132,7 @@ public class OpenSaml20SpProcessorTest {
 		// Request
 		logoutResponse.setIssuer(issuer);
 		logoutResponse.setID(RESPONSE_ID);
+		logoutResponse.setInResponseTo(REQUEST_ID);
 		
 		this.spProcessor.findSaml20IdpConnectorToUse(logoutResponse);
 

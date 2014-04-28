@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+import org.springframework.util.Assert;
+
 import fr.mby.saml2.sp.api.config.IIdpConfig;
 import fr.mby.saml2.sp.api.core.ISaml20IdpConnector;
 import fr.mby.saml2.sp.api.om.IRequestWaitingForResponse;
@@ -70,12 +72,12 @@ public class QuerySloRequest extends SamlQuery implements IRequestWaitingForResp
 	public void writeExternal(final ObjectOutput output) throws IOException {
 		output.writeObject(this.idpConnectorId);
 	}
-
+ 
 	protected void loadIdpConnector(final String idpConnectorId) {
 		final IIdpConfig idpConfig = SamlHelper.getWayfConfig().findIdpConfigById(idpConnectorId);
-		if (idpConfig != null) {
-			this.idpConnectorBuilder = idpConfig.getSaml20IdpConnector();
-		}
+		Assert.notNull(idpConfig, "No compatible IdP config found !");
+
+		this.idpConnectorBuilder = idpConfig.getSaml20IdpConnector();
 	}
 
 }

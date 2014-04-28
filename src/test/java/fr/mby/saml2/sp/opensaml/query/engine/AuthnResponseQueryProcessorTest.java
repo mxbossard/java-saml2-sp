@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.Response;
@@ -43,6 +44,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import fr.mby.saml2.sp.api.core.ISaml20Storage;
 import fr.mby.saml2.sp.api.core.SamlBindingEnum;
 import fr.mby.saml2.sp.api.exception.SamlProcessingException;
 import fr.mby.saml2.sp.api.exception.SamlSecurityException;
@@ -82,6 +84,8 @@ public class AuthnResponseQueryProcessorTest {
 	@Autowired
 	private AuthnResponseQueryProcessor processor;
 
+	private ISaml20Storage samlStorage;
+	
 	private static final String SAML_ATTRIBUTE_KEY_SCENARIO_1 = "ctemail";
 
 	private static final Object SAML_ATTRIBUTE_VALUE_SCENARIO_1 = "testValue";
@@ -113,20 +117,33 @@ public class AuthnResponseQueryProcessorTest {
 	}
 
 	/**
-	 * Initialize the Caches
+	 * Initialize the Storage by adding the original request in the storage.
 	 * 
 	 * @throws Exception
 	 */
 	@Before
-	public void initCaches() throws Exception {
-		this.spProcessor.getSaml20Storage().clear();
-
+	public void initStorageWithAuthnRequest() throws Exception {
+		this.samlStorage = Mockito.mock(ISaml20Storage.class);
+		
 		final AuthnRequest openSamlAuthnRequest = (AuthnRequest) SamlTestResourcesHelper
 				.buildOpenSamlXmlObjectFromResource(this.authnRequest);
 		final String id = openSamlAuthnRequest.getID();
+		
 		final Map<String, String[]> parametersMap = new HashMap<String, String[]>();
 		final IRequestWaitingForResponse requestData = new QueryAuthnRequest(id, this.idpConnector, parametersMap);
-		this.spProcessor.getSaml20Storage().storeRequestWaitingForResponse(requestData);
+		Mockito.when(this.samlStorage.findRequestWaitingForResponse(id)).thenReturn(requestData);
+		this.spProcessor.setSaml20Storage(this.samlStorage);
+	}
+
+	/**
+	 * Test a valid AuthnResponse without original AuthnRequest.
+	 * 
+	 * @throws Exception
+	 */
+	@Test(expected = SamlProcessingException.class)
+	public void testNoOriginalAuthnRequestProcessing() throws Exception {
+		this.spProcessor.setSaml20Storage(Mockito.mock(ISaml20Storage.class));
+		this.testAuthnResponseProcessingScenario1(this.responseAssertSigned);
 	}
 
 	/**
@@ -136,6 +153,7 @@ public class AuthnResponseQueryProcessorTest {
 	 */
 	@Test
 	public void testAssertSignedAuthnResponseProcessing() throws Exception {
+		this.initStorageWithAuthnRequest();
 		this.testAuthnResponseProcessingScenario1(this.responseAssertSigned);
 	}
 
@@ -146,6 +164,7 @@ public class AuthnResponseQueryProcessorTest {
 	 */
 	@Test
 	public void testSimpleSignedAuthnResponseProcessing() throws Exception {
+		this.initStorageWithAuthnRequest();
 		this.testAuthnResponseProcessingScenario1(this.responseSimpleSigned);
 	}
 
@@ -156,6 +175,7 @@ public class AuthnResponseQueryProcessorTest {
 	 */
 	@Test
 	public void testFullSignedAuthnResponseProcessing() throws Exception {
+		this.initStorageWithAuthnRequest();
 		this.testAuthnResponseProcessingScenario1(this.responseFullSigned);
 	}
 
@@ -188,17 +208,6 @@ public class AuthnResponseQueryProcessorTest {
 	@Test(expected = SamlProcessingException.class)
 	public void testAuthnResponseAttacked4() throws Exception {
 		this.testAuthnResponseProcessingScenario1(this.responseAttacked4);
-	}
-
-	/**
-	 * Test a valid AuthnResponse without original AuthnRequest.
-	 * 
-	 * @throws Exception
-	 */
-	@Test(expected = SamlProcessingException.class)
-	public void testNoOriginalAuthnRequestProcessing() throws Exception {
-		this.spProcessor.getSaml20Storage().clear();
-		this.testAuthnResponseProcessingScenario1(this.responseAssertSigned);
 	}
 
 	/**
