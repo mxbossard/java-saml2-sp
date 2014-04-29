@@ -34,7 +34,11 @@
 
 	<bean id="idpMetadata" class="org.springframework.core.io.ClassPathResource">
 		<constructor-arg type="String" value="saml/metadatas/idp_metadata.xml" />
-	</bean>	
+	</bean>
+	
+	<bean id="idp2Metadata" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/metadatas/idp2_metadata.xml" />
+	</bean>
 	
 	<bean id="authnRequest" class="org.springframework.core.io.ClassPathResource">
 		<constructor-arg type="String" value="saml/requests/authnRequest.xml" />

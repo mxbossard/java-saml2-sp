@@ -262,8 +262,7 @@ public class OpenSaml20SpProcessor implements ISaml20SpProcessor, InitializingBe
 			final Issuer issuer = samlRequest.getIssuer();
 			if (issuer != null) {
 				final String issuerEntityId = issuer.getValue();
-				this.idpConnectorsByEntityId.get(issuerEntityId);
-				// FIXME: Not implemented yet
+				samlConnector = this.idpConnectorsByEntityId.get(issuerEntityId);
 			}
 
 		}

@@ -25,23 +25,32 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
 		http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
     <description>
-    	Configuration for sign and encrypt as the IdP would do it.
     </description>
 	
-	<import resource="classpath:samlResources.xml"/>
+	<import resource="classpath:openSaml2QueryProcessorFactoryContext.xml"/>
+	
+	<!-- Wayf config -->
+	<bean id="wayfConfig" class="fr.mby.saml2.sp.impl.config.WayfConfig">
+		<property name="idpIdParamKey" value="idpId" />
+		<property name="config">
+			<list>
+				<ref bean="idpConfig" />
+			</list>
+		</property>
+	</bean>
 	
 	<!-- Service Provider config -->
 	<bean id="spConfig" class="fr.mby.saml2.sp.impl.config.BasicSpConfig">
-		<property name="id" value="IdP" />
-		<property name="entityId" value="http://www.recia.fr/spHackedForSignAsIdp" />
-		<property name="spMetadata" value="classpath:saml/metadatas/sp_metadata_hackedForSignAsIdp.xml" />
-		<property name="description" value="IdP sending response." />
+		<property name="id" value="testSpConfig" />
+		<property name="entityId" value="http://www.recia.fr/cas/Shibboleth.sso" />
+		<property name="spMetadata" ref="spMetadata" />
+		<property name="description" value="Service Provider inside CAS." />
 
-		<property name="decryptionKeyResource" ref="idpKey" />
+		<property name="decryptionKeyResource" ref="spKey" />
 		<property name="decryptionKeySpec" value="java.security.spec.PKCS8EncodedKeySpec" />
 		<property name="decryptionKeyType" value="RSA" />
 
-		<property name="signingKeyResource" ref="idpKey" />
+		<property name="signingKeyResource" ref="spKey" />
 		<property name="signingKeySpec" value="java.security.spec.PKCS8EncodedKeySpec" />
 		<property name="signingKeyType" value="RSA" />
 	</bean>
@@ -53,6 +62,7 @@
 		<property name="idpConnectors">
 			<list>
 				<ref bean="idpConnector" />
+				<ref bean="idpConnector2" />
 			</list>
 		</property>
 		
@@ -64,12 +74,48 @@
 		
 		<!-- Mocks -->
 		<property name="saml20Storage" ref="saml20Storage" />
+		
+	</bean>
+	
+	<bean id="idpConfig" class="fr.mby.saml2.sp.impl.config.BasicIdpConfig">
+		<property name="id" value="testIdpConfig" />
+		<property name="description" value="idp.test" />
+		<property name="pictureUrl" value="pictureUrl" />
 
+		<property name="forceAuthentication" value="true" />
+		<property name="requestBinding" value="SAML_20_HTTP_REDIRECT" />
+		<property name="responseBinding" value="SAML_20_HTTP_POST" />
+		<property name="attributeConsumingServiceIndex" value="1" />
+
+		<property name="idpEntityId" value="http://www.recia.fr/idp" />
+		<property name="idpMetadata" ref="idpMetadata" />
+	</bean>
+
+	<bean id="idpConnector"
+		class="fr.mby.saml2.sp.opensaml.core.OpenSaml20IdpConnector">
+		<property name="idpConfig" ref="idpConfig" />
+	</bean>
+		
+	<bean id="idpConfig2" class="fr.mby.saml2.sp.impl.config.BasicIdpConfig">
+		<property name="id" value="testIdpConfig2" />
+		<property name="description" value="idp.test.2" />
+		<property name="pictureUrl" value="pictureUrl2" />
+
+		<property name="forceAuthentication" value="true" />
+		<property name="requestBinding" value="SAML_20_HTTP_REDIRECT" />
+		<property name="responseBinding" value="SAML_20_HTTP_POST" />
+		<property name="attributeConsumingServiceIndex" value="1" />
+
+		<property name="idpEntityId" value="http://www.recia.fr/idp2" />
+		<property name="idpMetadata" ref="idp2Metadata" />
+	</bean>
+
+	<bean id="idpConnector2"
+		class="fr.mby.saml2.sp.opensaml.core.OpenSaml20IdpConnector">
+		<property name="idpConfig" ref="idpConfig2" />
 	</bean>
 	
 	<!-- Mocked beans -->
 	<mockito:mock id="saml20Storage" class="fr.mby.saml2.sp.api.core.ISaml20Storage" />
-	<mockito:mock id="idpConnector" class="fr.mby.saml2.sp.opensaml.core.OpenSaml20IdpConnector" />
-	<mockito:mock id="queryProcessorFactory" class="fr.mby.saml2.sp.opensaml.query.engine.OpenSaml2QueryProcessorFactory" />
-
+	
 </beans>
