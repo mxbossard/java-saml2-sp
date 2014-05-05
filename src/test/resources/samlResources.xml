@@ -54,9 +54,19 @@
 		<constructor-arg type="String" value="saml/requests/response_signed_assert.xml" />
 	</bean>
 	
-	<!-- Signature only on Response & Assertion -->
+	<!-- Signature on Response & Assertion -->
 	<bean id="responseFullSigned" class="org.springframework.core.io.ClassPathResource">
 		<constructor-arg type="String" value="saml/requests/response_signed_full.xml" />
+	</bean>
+	
+		<!-- Signature on Response & Assertion -->
+	<bean id="responseFullSignedRedirectEncoded" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/response_signed_full_redirect_encoded.xml" />
+	</bean>
+	
+		<!-- Signature on Response & Assertion -->
+	<bean id="responseFullSignedPostEncoded" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/response_signed_full_post_encoded.xml" />
 	</bean>
 	
 	<bean id="sloRequest" class="org.springframework.core.io.ClassPathResource">

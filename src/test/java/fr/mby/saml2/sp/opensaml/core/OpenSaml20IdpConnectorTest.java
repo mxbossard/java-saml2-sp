@@ -60,15 +60,6 @@ import fr.mby.saml2.sp.impl.query.QuerySloResponse;
 @ContextConfiguration(locations = "classpath:openSaml20IdpConnectorContext.xml")
 public class OpenSaml20IdpConnectorTest {
 
-	@javax.annotation.Resource(name = "responseAssertSigned")
-	private ClassPathResource responseAssertSigned;
-
-	@javax.annotation.Resource(name = "responseSimpleSigned")
-	private ClassPathResource responseSimpleSigned;
-
-	@javax.annotation.Resource(name = "responseFullSigned")
-	private ClassPathResource responseFullSigned;
-
 	@Autowired
 	private OpenSaml20IdpConnector idpConnector;
 

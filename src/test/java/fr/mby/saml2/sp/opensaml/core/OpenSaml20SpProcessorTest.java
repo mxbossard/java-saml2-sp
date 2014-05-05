@@ -30,18 +30,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.opensaml.DefaultBootstrap;
-import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.signature.Signature;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fr.mby.saml2.sp.api.handler.IAuthenticationHandler;
 import fr.mby.saml2.sp.api.om.IAuthentication;
 import fr.mby.saml2.sp.api.om.IIncomingSaml;
-import fr.mby.saml2.sp.impl.helper.SamlTestResourcesHelper;
 import fr.mby.saml2.sp.impl.om.BasicSamlAuthentication;
 import fr.mby.saml2.sp.impl.query.QueryAuthnResponse;
 
