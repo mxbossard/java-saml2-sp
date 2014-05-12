@@ -19,12 +19,12 @@
 
 package fr.mby.saml2.sp.opensaml.core;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -44,7 +44,9 @@ import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.signature.Signature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -58,7 +60,6 @@ import fr.mby.saml2.sp.api.om.IRequestWaitingForResponse;
 import fr.mby.saml2.sp.impl.helper.SamlTestResourcesHelper;
 import fr.mby.saml2.sp.impl.om.BasicSamlAuthentication;
 import fr.mby.saml2.sp.impl.query.QueryAuthnRequest;
-import fr.mby.saml2.sp.impl.query.QuerySloRequest;
 
 /**
  * Integration Test for opensaml2 implementations.
@@ -91,15 +92,31 @@ public class OpenSaml20IntegrationTest {
 	
 	private static final String SP_AUTHN_REDIRECT_URI_ENDPOINT = "/cas/Shibboleth.sso/SAML2/Redirect";
 
+	private static final String SP_SLO_POST_URI_ENDPOINT = "/cas/Shibboleth.sso/SLO/POST";
+	
+	private static final String SP_SLO_REDIRECT_URI_ENDPOINT = "/cas/Shibboleth.sso/SLO/Redirect";
+	
 	@javax.annotation.Resource(name = "authnRequest")
 	private ClassPathResource authnRequest;
 	
-	@javax.annotation.Resource(name = "responseFullSignedRedirectEncoded")
-	private ClassPathResource responseFullSignedRedirectEncoded;
+	@javax.annotation.Resource(name = "incomingResponseFullSignedRedirectEncoded")
+	private ClassPathResource incomingResponseFullSignedRedirectEncoded;
 	
-	@javax.annotation.Resource(name = "responseFullSignedPostEncoded")
-	private ClassPathResource responseFullSignedPostEncoded;
+	@javax.annotation.Resource(name = "incomingResponseFullSignedPostEncoded")
+	private ClassPathResource incomingResponseFullSignedPostEncoded;
 	
+	@javax.annotation.Resource(name = "incomingSloRequestRedirectEncoded")
+	private ClassPathResource incomingSloRequestRedirectEncoded;
+	
+	@javax.annotation.Resource(name = "incomingSloRequestPostEncoded")
+	private ClassPathResource incomingSloRequestPostEncoded;
+	
+	@javax.annotation.Resource(name = "incomingSloResponseRedirectEncoded")
+	private ClassPathResource incomingSloResponseRedirectEncoded;
+	
+	@javax.annotation.Resource(name = "incomingSloResponsePostEncoded")
+	private ClassPathResource incomingSloResponsePostEncoded;
+
 	@Autowired
 	@Qualifier("idpConnector")
 	private OpenSaml20IdpConnector idpConnector1;
@@ -257,11 +274,7 @@ public class OpenSaml20IntegrationTest {
 		final IRequestWaitingForResponse authnRequestData = new QueryAuthnRequest(authnRequestId, this.idpConnector1, parametersMap);
 		Mockito.when(this.samlStorage.findRequestWaitingForResponse(authnRequestId)).thenReturn(authnRequestData);
 		
-		final MockHttpServletRequest request = new MockHttpServletRequest("POST", SP_AUTHN_POST_URI_ENDPOINT);
-		final String encodedRequest = SamlTestResourcesHelper.readFile(this.responseFullSignedPostEncoded);
-		request.setServerName(SP_AUTHN_SERVER_NAME_ENDPOINT);
-		request.setParameter("SAMLResponse", encodedRequest);
-		request.setParameter("RelayState", relayState);
+		final MockHttpServletRequest request = this.buildAuthnPostResponse(relayState, this.incomingResponseFullSignedPostEncoded);
 
 		final IIncomingSaml incomingSaml = this.spProcessor.processSaml20IncomingRequest(request);
 
@@ -272,15 +285,8 @@ public class OpenSaml20IntegrationTest {
 
 	@Test
 	public void testProcessSaml20IncomingRequestWithRedirectAuthnResponse() throws Exception {
-		// TODO implement this test
 		final String relayState = "rs_28435";
-		
-		final String encodedRequest = SamlTestResourcesHelper.readFile(this.responseFullSignedRedirectEncoded);
-		final MockHttpServletRequest request = new MockHttpServletRequest("GET", SP_AUTHN_REDIRECT_URI_ENDPOINT);
-		request.setServerName(SP_AUTHN_SERVER_NAME_ENDPOINT);
-		request.setQueryString("?SAMLResponse=" + encodedRequest + "&RelayState=" + relayState);
-		request.setParameter("SAMLResponse", URLDecoder.decode(encodedRequest, "UTF-8"));
-		request.setParameter("RelayState", relayState);
+		final MockHttpServletRequest request = this.buildAuthnRedirectResponse(relayState, this.incomingResponseFullSignedRedirectEncoded);
 		
 		final IIncomingSaml incomingSaml = this.spProcessor.processSaml20IncomingRequest(request);
 
@@ -288,30 +294,53 @@ public class OpenSaml20IntegrationTest {
 		
 		// TODO implement checks
 	}
-	
+
 	@Test
-	public void testProcessSaml20IncomingRequestWithGetSloRequest() throws Exception {
-		// TODO implement this test
+	public void testProcessSaml20IncomingRequestWithRedirectSloRequest() throws Exception {
 		final String relayState = "rs_69437";
-		
-		final MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setMethod("GET");
-		request.setAttribute("SAMLRequest", null);
-		request.setAttribute("RelayState", relayState);
+		final MockHttpServletRequest request = this.buildSloRedirectRequest(relayState, this.incomingSloRequestRedirectEncoded);
 		
 		final IIncomingSaml incomingSaml = this.spProcessor.processSaml20IncomingRequest(request);
 
 		Assert.assertNotNull("SloRequest's IIncomingSaml cannot be null !", incomingSaml);
+		
+		// TODO implement checks
 	}
 
 	@Test
-	public void testProcessSaml20IncomingRequestWithSloResponse() throws Exception {
-		// TODO implement this test
-		final MockHttpServletRequest request = new MockHttpServletRequest();
-
+	public void testProcessSaml20IncomingRequestWithPostSloRequest() throws Exception {
+		final String relayState = "rs_19346";
+		final MockHttpServletRequest request = this.buildSloPostRequest(relayState, this.incomingSloRequestPostEncoded);
+		
 		final IIncomingSaml incomingSaml = this.spProcessor.processSaml20IncomingRequest(request);
 
+		Assert.assertNotNull("SloRequest's IIncomingSaml cannot be null !", incomingSaml);
+		
+		// TODO implement checks
+	}
+
+	@Test
+	public void testProcessSaml20IncomingRequestWithRedirectSloResponse() throws Exception {
+		final String relayState = "rs_83946";
+		final MockHttpServletRequest request = this.buildSloRedirectResponse(relayState, this.incomingSloResponseRedirectEncoded);
+
+		final IIncomingSaml incomingSaml = this.spProcessor.processSaml20IncomingRequest(request);
+		
 		Assert.assertNotNull("SloResponse's IIncomingSaml cannot be null !", incomingSaml);
+		
+		// TODO implement checks
+	}
+
+	@Test
+	public void testProcessSaml20IncomingRequestWithPostSloResponse() throws Exception {
+		final String relayState = "rs_83946";
+		final MockHttpServletRequest request = this.buildSloPostResponse(relayState, this.incomingSloResponsePostEncoded);
+
+		final IIncomingSaml incomingSaml = this.spProcessor.processSaml20IncomingRequest(request);
+		
+		Assert.assertNotNull("SloResponse's IIncomingSaml cannot be null !", incomingSaml);
+		
+		// TODO implement checks
 	}
 
 	@Test
@@ -328,5 +357,74 @@ public class OpenSaml20IntegrationTest {
 		// TODO implement this test
 		final String sessionIndex = "index_de_folie";
 		this.spProcessor.logout(sessionIndex);
+	}
+	
+	protected MockHttpServletRequest buildAuthnRedirectResponse(
+			final String relayState, final Resource redirectEncodedResource) throws IOException,
+			UnsupportedEncodingException {
+		final String encodedRequest = SamlTestResourcesHelper.readFile(redirectEncodedResource);
+		final MockHttpServletRequest request = new MockHttpServletRequest("GET", SP_AUTHN_REDIRECT_URI_ENDPOINT);
+		request.setServerName(SP_AUTHN_SERVER_NAME_ENDPOINT);
+		request.setQueryString("?SAMLResponse=" + encodedRequest + "&RelayState=" + relayState);
+		request.setParameter("SAMLResponse", URLDecoder.decode(encodedRequest, "UTF-8"));
+		request.setParameter("RelayState", relayState);
+		return request;
+	}
+	
+	protected MockHttpServletRequest buildAuthnPostResponse(
+			final String relayState, final Resource postEncodedResource) throws IOException,
+			UnsupportedEncodingException {
+		final String encodedRequest = SamlTestResourcesHelper.readFile(postEncodedResource);
+		final MockHttpServletRequest request = new MockHttpServletRequest("POST", SP_AUTHN_POST_URI_ENDPOINT);
+		request.setServerName(SP_AUTHN_SERVER_NAME_ENDPOINT);
+		request.setParameter("SAMLResponse", encodedRequest);
+		request.setParameter("RelayState", relayState);
+		return request;
+	}
+	
+	protected MockHttpServletRequest buildSloRedirectRequest(
+			final String relayState, final Resource redirectEncodedResource) throws IOException,
+			UnsupportedEncodingException {
+		final String encodedRequest = SamlTestResourcesHelper.readFile(redirectEncodedResource);
+		final MockHttpServletRequest request = new MockHttpServletRequest("GET", SP_SLO_REDIRECT_URI_ENDPOINT);
+		request.setServerName(SP_AUTHN_SERVER_NAME_ENDPOINT);
+		request.setQueryString("?SAMLRequest=" + encodedRequest + "&RelayState=" + relayState);
+		request.setParameter("SAMLRequest", URLDecoder.decode(encodedRequest, "UTF-8"));
+		request.setParameter("RelayState", relayState);
+		return request;
+	}
+
+	protected MockHttpServletRequest buildSloPostRequest(
+			final String relayState, final Resource postEncodedResource) throws IOException,
+			UnsupportedEncodingException {
+		final String encodedRequest = SamlTestResourcesHelper.readFile(postEncodedResource);
+		final MockHttpServletRequest request = new MockHttpServletRequest("POST", SP_SLO_POST_URI_ENDPOINT);
+		request.setServerName(SP_AUTHN_SERVER_NAME_ENDPOINT);
+		request.setParameter("SAMLRequest", encodedRequest);
+		request.setParameter("RelayState", relayState);
+		return request;
+	}
+	
+	protected MockHttpServletRequest buildSloRedirectResponse(
+			final String relayState, final Resource redirectEncodedResource) throws IOException,
+			UnsupportedEncodingException {
+		final String encodedRequest = SamlTestResourcesHelper.readFile(redirectEncodedResource);
+		final MockHttpServletRequest request = new MockHttpServletRequest("GET", SP_SLO_REDIRECT_URI_ENDPOINT);
+		request.setServerName(SP_AUTHN_SERVER_NAME_ENDPOINT);
+		request.setQueryString("?SAMLResponse=" + encodedRequest + "&RelayState=" + relayState);
+		request.setParameter("SAMLResponse", URLDecoder.decode(encodedRequest, "UTF-8"));
+		request.setParameter("RelayState", relayState);
+		return request;
+	}
+
+	protected MockHttpServletRequest buildSloPostResponse(
+			final String relayState, final Resource postEncodedResource) throws IOException,
+			UnsupportedEncodingException {
+		final String encodedRequest = SamlTestResourcesHelper.readFile(postEncodedResource);
+		final MockHttpServletRequest request = new MockHttpServletRequest("POST", SP_SLO_POST_URI_ENDPOINT);
+		request.setServerName(SP_AUTHN_SERVER_NAME_ENDPOINT);
+		request.setParameter("SAMLResponse", encodedRequest);
+		request.setParameter("RelayState", relayState);
+		return request;
 	}
 }

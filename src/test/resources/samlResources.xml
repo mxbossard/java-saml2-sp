@@ -60,21 +60,37 @@
 	</bean>
 	
 		<!-- Signature on Response & Assertion -->
-	<bean id="responseFullSignedRedirectEncoded" class="org.springframework.core.io.ClassPathResource">
-		<constructor-arg type="String" value="saml/requests/response_signed_full_redirect_encoded.xml" />
+	<bean id="incomingResponseFullSignedRedirectEncoded" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/incoming_response_signed_full_redirect_encoded.xml" />
 	</bean>
 	
 		<!-- Signature on Response & Assertion -->
-	<bean id="responseFullSignedPostEncoded" class="org.springframework.core.io.ClassPathResource">
-		<constructor-arg type="String" value="saml/requests/response_signed_full_post_encoded.xml" />
+	<bean id="incomingResponseFullSignedPostEncoded" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/incoming_response_signed_full_post_encoded.xml" />
 	</bean>
 	
 	<bean id="sloRequest" class="org.springframework.core.io.ClassPathResource">
 		<constructor-arg type="String" value="saml/requests/slo_request.xml" />
 	</bean>
 	
+	<bean id="incomingSloRequestRedirectEncoded" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/incoming_slo_request_redirect_encoded.xml" />
+	</bean>
+		
+	<bean id="incomingSloRequestPostEncoded" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/incoming_slo_request_post_encoded.xml" />
+	</bean>
+	
 	<bean id="sloResponse" class="org.springframework.core.io.ClassPathResource">
 		<constructor-arg type="String" value="saml/requests/slo_response.xml" />
+	</bean>
+	
+	<bean id="incomingSloResponseRedirectEncoded" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/incoming_slo_response_redirect_encoded.xml" />
+	</bean>
+	
+	<bean id="incomingSloResponsePostEncoded" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg type="String" value="saml/requests/incoming_slo_response_post_encoded.xml" />
 	</bean>
 	
 	<bean id="responseAttacked1" class="org.springframework.core.io.ClassPathResource">
